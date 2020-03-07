@@ -19,7 +19,7 @@
 			}
 		},
 		{
-			"path": "pages/tabBar/API/API",
+			"path": "pages/tabBar/tool/tool",
 			"style": {
 				"navigationBarTitleText": "传播工具",
 				"app-plus": {
@@ -303,6 +303,16 @@
 		}
 	],
 	"subPackages": [{
+			"root": "pages/tool",
+			"pages": [
+				// {
+				// 	"path": "login/login",
+				// 	"style": {
+				// 		"navigationBarTitleText": "授权登录"
+				// 	}
+				// }
+			]
+		}, {
 			"root": "pages/API",
 			"pages": [{
 					"path": "login/login",
@@ -1114,7 +1124,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "老易 • 精选优惠",
+		"navigationBarTitleText": "老易 • 优惠精选",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#F8F8F8",
 		"backgroundColorTop": "#F4F5F6",
@@ -1132,7 +1142,7 @@
 				"text": "首页"
 			},
 			{
-				"pagePath": "pages/tabBar/API/API",
+				"pagePath": "pages/tabBar/tool/tool",
 				"iconPath": "static/tool.png",
 				"selectedIconPath": "static/toolHL.png",
 				"text": "传播工具"
