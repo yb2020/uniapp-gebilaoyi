@@ -1,6 +1,10 @@
 <script>
+	import store from '@/store'
+	import ACLApi from '@/common/ACL'
+	import Authorization from "@/common/Authorization"
+	
     export default {
-        onLaunch: function() {
+        onLaunch: async options => {
             console.log('App Launch');
             // #ifdef APP-PLUS
             // 检测升级
@@ -28,6 +32,25 @@
                 }
             })
             // #endif
+			
+			var _this = this
+			let systemParams = uni.getStorageSync("systemParams")
+			let scene = options.query.scene
+			
+			if(!systemParams && scene) {
+				var {paramters} = await ACLApi.qr.app.getByIdName(scene)
+				store.commit("init",{
+					orgId: ACLApi.qr.app.utils.get(paramters, "orgId") || "8041b3e636d54b8db78f49572ba414bf",
+					appName: ACLApi.qr.app.utils.get(paramters, "appId") || "yiblog",
+					agent: ACLApi.qr.app.utils.get(paramters, "agent") || ""
+				})
+			} else {
+				store.commit("init",{
+					orgId: ACLApi.qr.app.utils.get(systemParams, "orgId") || "8041b3e636d54b8db78f49572ba414bf",
+					appName: ACLApi.qr.app.utils.get(systemParams, "appId") || "yiblog",
+					agent: ACLApi.qr.app.utils.get(systemParams, "agent") || ""
+				})
+			}
         },
         onShow: function() {
             console.log('App Show')
