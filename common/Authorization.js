@@ -45,14 +45,17 @@ export default {
 		});	
 	},
 	toLogin() {
-		uni.getUserInfo({
-			success: (res) => {
-				console.log('userInfo success:', res);
-				
-			},
-			fail: (err) => {
-			    console.log('userInfo fail:', err);
-			}
+		return new Promise((resolve, reject) => {
+			uni.getUserInfo({
+				success: res => {
+					console.log('userInfo success:', res);
+					resolve(true)
+				},
+				fail: err => {
+				    console.log('userInfo fail:', err);
+					resolve(false)
+				}
+			})
 		})
 		
 	},

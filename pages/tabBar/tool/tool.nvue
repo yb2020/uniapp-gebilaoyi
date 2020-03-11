@@ -101,6 +101,7 @@
 				userInfo: this.$store.state,
 				list: [],
                 navigateFlag: false,
+				isHiddenTabBar: true,
 				background: ['color1', 'color2', 'color3'],
 				indicatorDots: true,
 				autoplay: true,
@@ -132,8 +133,13 @@
             this.leaveSetTabBarPage();
         },
         methods: {
-			toLogin() {
-				Authorization.toLogin()
+			async toLogin() {
+				this.toggleHideTabBar()
+				var result = await Authorization.toLogin()
+				if(!result) {
+					//弹出登录框
+					console.log(result)
+				}
 			},
 			changeIndicatorDots(e) {
 				this.indicatorDots = !this.indicatorDots
@@ -251,7 +257,15 @@
 					this.getList()
 					console.log("true")
 				}
-			}
+			},
+			toggleHideTabBar() {
+				if (this.isHiddenTabBar) {
+					uni.hideTabBar()
+				} else {
+					uni.showTabBar()
+				}
+				this.isHiddenTabBar = !this.isHiddenTabBar
+			},
         }
     };
 </script>
