@@ -5,13 +5,12 @@
 				<image class="user-avatar" :src="userInfo.avatarUrl"></image>
 			</view>
 			<view class="user-title">
-				<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
-				<button @click="getUserInfo" size="mini" v-if="!userInfo.isLogin">{{userInfo.nickName}}</button>
-				<!-- #endif -->
-				<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
-				<button type="primary" size="mini" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="!userInfo.isLogin">{{userInfo.nickName}}</button>
-				<!-- #endif -->
-				<text v-if="userInfo.isLogin">{{userInfo.nickName}}</text>
+				<text @click="toLogin">
+					{{userInfo.nickName}}
+				</text>
+				<text>
+					{{userInfo.username}}
+				</text>
 			</view>
 		</view>
 		<view class="my-top">
@@ -53,17 +52,52 @@
 				<view class="icon">6</view>
 			</view>
 		</view>
+		<Login ref="login" @close="closeLogin" @done="doneLogin"></Login>
+		
 	</view>
 </template>
 
 <script>
 	import Authorization from "@/common/Authorization"
+	import Login from "@/pages/components/login"
 	
 	export default {
+		components: {
+			Login
+		},
 		data() {
 			return {
 				userInfo: this.$store.state,
+				isHiddenTabBar: true
 			};
+		},
+		onShow() {
+			Authorization.checkLogin()
+		},
+		methods: {
+			toLogin() {
+				if(!Authorization.checkLogin()) {
+					this.toggleHideTabBar()
+					this.$refs["login"].open()
+				}
+				
+			},
+			closeLogin() {
+				this.toggleHideTabBar()
+			},
+			doneLogin(bool) {
+				if(bool) {
+					this.getList()
+				}
+			},
+			toggleHideTabBar() {
+				if (this.isHiddenTabBar) {
+					uni.hideTabBar()
+				} else {
+					uni.showTabBar()
+				}
+				this.isHiddenTabBar = !this.isHiddenTabBar
+			},
 		}
 	};
 </script>

@@ -20,13 +20,6 @@
 		
 		<view class="uni-userinfo">
 			<view class="userinfo-name">
-				<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
-				<button @click="getUserInfo" size="mini" v-if="userInfo.isLogin">{{userInfo.nickName}}</button>
-				<!-- #endif -->
-				<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
-				<button type="primary" size="mini" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="userInfo.isLogin">{{userInfo.nickName}}</button>
-				<!-- #endif -->
-				
 				<text @click="toLogin">
 					{{userInfo.nickName || userInfo.email}}
 				</text>
@@ -75,6 +68,7 @@
 			</view>
 		</view>
 		
+		<Login ref="login" @close="closeLogin" @done="doneLogin"></Login>
 		
 			
     </view>
@@ -82,6 +76,7 @@
 <script>
 	import Authorization from "@/common/Authorization"
 	import laoyiApi from "@/api/laoyi"
+	import Login from "@/pages/components/login"
 	
 	import {
 		mapState,
@@ -90,6 +85,7 @@
 	
     export default {
         components: {
+			Login
         },
 		computed: {
 			...mapState({
@@ -127,19 +123,29 @@
         onShow() {
             this.navigateFlag = false;
             this.leaveSetTabBarPage();
-			this.getList();
+			
+			if(Authorization.checkLogin()) {
+				this.getList();
+			}
+
         },
         onHide() {
             this.leaveSetTabBarPage();
         },
         methods: {
-			async toLogin() {
-				this.toggleHideTabBar()
-				var result = await Authorization.toLogin()
-				if(!result) {
-					//弹出登录框
-					console.log(result)
+			toLogin() {
+				if(!Authorization.checkLogin()) {
+					this.toggleHideTabBar()
+					this.$refs["login"].open()
+					return false
+				}else {
+					this.getList()
+					return true
 				}
+				
+			},
+			closeLogin() {
+				this.toggleHideTabBar()
 			},
 			changeIndicatorDots(e) {
 				this.indicatorDots = !this.indicatorDots
@@ -183,67 +189,6 @@
                     this.navigateFlag = false;
                 }, 200)
             },
-			// 获取用户信息 API 在小程序可直接使用，在 5+App 里面需要先登录才能调用
-			getUserInfo() {
-				uni.getUserInfo({
-					provider: this.loginProvider,
-					success: (result) => {
-						console.log('getUserInfo success', result);
-						this.hasUserInfo = true;
-						this.userInfo = result.userInfo;
-					},
-					fail: (error) => {
-						console.log('getUserInfo fail', error);
-						let content = error.errMsg;
-						if (~content.indexOf('uni.login')) {
-							content = '请在登录页面完成登录操作';
-						}
-			            // #ifndef APP-PLUS
-						uni.getSetting({
-							success: (res) => {
-								let authStatus = res.authSetting['scope.userInfo'];
-								if (!authStatus) {
-									uni.showModal({
-										title: '授权失败',
-										content: 'Hello uni-app需要获取您的用户信息，请在设置界面打开相关权限',
-										success: (res) => {
-											if (res.confirm) {
-												uni.openSetting()
-											}
-										}
-									})
-								} else {
-									uni.showModal({
-										title: '获取用户信息失败',
-										content: '错误原因' + content,
-										showCancel: false
-									});
-								}
-							}
-						})
-			            // #endif
-			            // #ifdef APP-PLUS
-			            uni.showModal({
-			            	title: '获取用户信息失败',
-			            	content: '错误原因' + content,
-			            	showCancel: false
-			            });
-			            // #endif
-					}
-				});
-			},
-			mpGetUserInfo(result) {
-				if (result.detail.errMsg !== 'getUserInfo:ok') {
-					uni.showModal({
-						title: '您已拒绝微信授权',
-						content: '请允许微信授权登录，\n体验更多本小程序功能！',
-						showCancel: false
-					});
-					return;
-				}else {
-					Authorization.wx.login(this.loginDone)
-				}
-			},
 			getList() {
 				console.log("get List")
 				if(this.$store.state.isLogin) {
@@ -252,10 +197,9 @@
 					})
 				}
 			},
-			loginDone(bool) {
+			doneLogin(bool) {
 				if(bool) {
 					this.getList()
-					console.log("true")
 				}
 			},
 			toggleHideTabBar() {
@@ -293,7 +237,7 @@
 		height: 80rpx;
 		top: 50rpx;
 		left: 0;
-		z-index: 989999;
+		z-index: 99;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -347,74 +291,4 @@
 	}
 	
 	
-	/* 底部分享 */
-	.uni-share {
-		/* #ifndef APP-NVUE */
-		display: flex;
-		flex-direction: column;
-		/* #endif */
-		background-color: #fff;
-	}
-	
-	.uni-share-title {
-		line-height: 60rpx;
-		font-size: 24rpx;
-		padding: 15rpx 0;
-		text-align: center;
-	}
-	
-	.uni-share-content {
-		/* #ifndef APP-NVUE */
-		display: flex;
-		/* #endif */
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		padding: 15px;
-	}
-	
-	.uni-share-content-box {
-		/* #ifndef APP-NVUE */
-		display: flex;
-		/* #endif */
-		flex-direction: column;
-		align-items: center;
-		width: 200rpx;
-	}
-	
-	.uni-share-content-image {
-		/* #ifndef APP-NVUE */
-		display: flex;
-		/* #endif */
-		flex-direction: row;
-		justify-content: center;
-		align-items: center;
-		width: 60rpx;
-		height: 60rpx;
-		overflow: hidden;
-		border-radius: 10rpx;
-	}
-	
-	.content-image {
-		width: 60rpx;
-		height: 60rpx;
-	}
-	
-	.uni-share-content-text {
-		font-size: 26rpx;
-		color: #333;
-		padding-top: 5px;
-		padding-bottom: 10px;
-	}
-	
-	.uni-share-btn {
-		height: 90rpx;
-		line-height: 90rpx;
-		font-size: 14px;
-		border-top-color: #f5f5f5;
-		border-top-width: 1px;
-		border-top-style: solid;
-		text-align: center;
-		color: #666;
-	}
 </style>

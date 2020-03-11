@@ -18,9 +18,10 @@ const store = new Vuex.Store({
 		
 		isLogin: false,
 		token: '',  
-		avatarUrl: '/static/shuijiao.jpg',
+		avatarUrl: '/static/user.png',
 		nickName: '点击登录',
 		username: '',
+		mobile: '',
 		orgId: '',
 		openId: '',
 		appName: '',

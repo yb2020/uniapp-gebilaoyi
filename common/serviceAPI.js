@@ -15,8 +15,8 @@ serviceAPI.setConfig({
 serviceAPI.interceptor.request = (config => {
     // 给header添加全局请求参数token
 	config.header.Authorization = config.header.Authorization || store.state.token
-	config.data.orgId = config.data.orgId || store.state.orgId
-	config.data.appId = config.data.appId || store.state.appName
+	// config.data.orgId = config.data.orgId || store.state.orgId
+	// config.data.appId = config.data.appId || store.state.appName
 	
     // 添加一个自定义的参数，默认异常请求都弹出一个toast提示
     if (config.toastError === undefined) {
