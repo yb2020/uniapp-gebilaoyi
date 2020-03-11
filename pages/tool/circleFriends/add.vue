@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import Header from '../../header/header.vue';
-import app from '../../App.vue'
+import Header from '@/header/header.vue';
+import app from '@/App.vue'
 export default {
 	components: {
 		Header

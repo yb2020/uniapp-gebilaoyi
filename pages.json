@@ -22,54 +22,6 @@
 			"path": "pages/tabBar/tool/tool",
 			"style": {
 				"navigationBarTitleText": "传播工具",
-				"app-plus": {
-					"titleNView": {
-						"buttons": [{
-							"text": "\ue534",
-							"fontSrc": "/static/uni.ttf",
-							"fontSize": "22px",
-							"color": "#FFFFFF"
-						}]
-					}
-				}
-			}
-<<<<<<< HEAD
-		}, {
-			"path": "pages/Publications/index",
-			"style": {
-				"navigationBarTitleText": "朋友圈",
-				"navigationStyle": "custom"
-				// "app-plus": {
-				// 	"titleNView": {
-				// 		"buttons": [{
-				// 			"text": "\ue534",
-				// 			"fontSrc": "/static/uni.ttf",
-				// 			"fontSize": "22px",
-				// 			"color": "#FFFFFF"
-				// 		}]
-				// 	}
-				// }
-			}
-		},
-		{
-			"path": "pages/tabBar/extUI/extUI",
-			"style": {
-				"navigationBarTitleText": "省钱攻略",
-				"app-plus": {
-					"titleNView": {
-						"buttons": [{
-							"text": "\ue534",
-							"fontSrc": "/static/uni.ttf",
-							"fontSize": "22px",
-							"color": "#FFFFFF"
-						}]
-					}
-				}
-			}
-		}, {
-			"path": "pages/tabBar/Circles/Circles",
-			"style": {
-				"navigationBarTitleText": "朋友圈",
 				"navigationStyle": "custom",
 				"app-plus": {
 					"titleNView": {
@@ -82,7 +34,6 @@
 					}
 				}
 			}
-=======
 		},
 		{
 			"path": "pages/tabBar/API/API",
@@ -115,7 +66,22 @@
 					}
 				}
 			}
->>>>>>> 02210cfdd78aff405be54d6063a82c7bcae4f1e0
+		},
+		{
+			"path": "pages/tabBar/template/template",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}
 		},
 		{
 			"path": "pages/tabBar/my/my",
@@ -373,12 +339,13 @@
 	"subPackages": [{
 			"root": "pages/tool",
 			"pages": [
-				// {
-				// 	"path": "login/login",
-				// 	"style": {
-				// 		"navigationBarTitleText": "授权登录"
-				// 	}
-				// }
+				{
+					"path": "circleFriends/add",
+					"style": {
+						"navigationBarTitleText": "朋友圈",
+						"navigationStyle": "custom"
+					}
+				}
 			]
 		}, {
 			"root": "pages/API",
@@ -1221,7 +1188,7 @@
 				"selectedIconPath": "static/toolHL.png",
 				"text": "api"
 			}, {
-				"pagePath": "pages/tabBar/Circles/Circles",
+				"pagePath": "pages/tabBar/extUI/extUI",
 				"iconPath": "static/eye.png",
 				"selectedIconPath": "static/eyeHL.png",
 				"text": "攻略"
@@ -1230,6 +1197,11 @@
 				"iconPath": "static/person.png",
 				"selectedIconPath": "static/personHL.png",
 				"text": "我的"
+			// }, {
+			// 	"pagePath": "pages/tabBar/template/template",
+			// 	"iconPath": "static/person.png",
+			// 	"selectedIconPath": "static/personHL.png",
+			// 	"text": "我的"
 			}
 		]
 	}

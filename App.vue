@@ -1,51 +1,3 @@
-<<<<<<< HEAD
-<script>
-export default {
-	onLaunch: function() {
-		console.log('App Launch');
-		// #ifdef APP-PLUS
-		// 检测升级
-		uni.request({
-			url: 'https://uniapp.dcloud.io/update', //检查更新的服务器地址
-			data: {
-				appid: plus.runtime.appid,
-				version: plus.runtime.version,
-				imei: plus.device.imei
-			},
-			success: res => {
-				if (res.statusCode == 200 && res.data.isUpdate) {
-					let openUrl = plus.os.name === 'iOS' ? res.data.iOS : res.data.Android;
-					// 提醒用户更新
-					uni.showModal({
-						title: '更新提示',
-						content: res.data.note ? res.data.note : '是否选择更新',
-						success: showResult => {
-							if (showResult.confirm) {
-								plus.runtime.openURL(openUrl);
-							}
-						}
-					});
-				}
-			}
-		});
-		// #endif
-	},
-	onShow: function() {
-		console.log('App Show');
-	},
-	onHide: function() {
-		console.log('App Hide');
-	},
-	methods: {
-		getPhoneHeight() {
-			let that = this;
-			uni.getSystemInfo({
-				success: function(res) {
-					console.log(res)
-					that.globalData.phoneHeight = res.statusBarHeight;
-				}
-			});
-=======
 <script>
 	import store from '@/store'
 	import ACLApi from '@/common/ACL'
@@ -85,6 +37,9 @@ export default {
 			let systemParams = uni.getStorageSync("systemParams")
 			let scene = options.query.scene
 			
+			//记录当前登录
+			Authorization.getProvider()
+			
 			if(!systemParams && scene) {
 				var {paramters} = await ACLApi.qr.app.getByIdName(scene)
 				store.commit("init",{
@@ -100,6 +55,17 @@ export default {
 				})
 			}
         },
+		methods: {
+			getPhoneHeight() {
+				let that = this;
+				uni.getSystemInfo({
+					success: function(res) {
+						console.log(res)
+						that.globalData.phoneHeight = res.statusBarHeight;
+					}
+				});
+			}	
+		},
         onShow: function() {
             console.log('App Show')
         },
@@ -108,14 +74,9 @@ export default {
         },
 		globalData: {
 			test: ''
->>>>>>> 02210cfdd78aff405be54d6063a82c7bcae4f1e0
 		}
-	},
-
-	globalData: {
-		test: '尼玛'
 	}
-};
+
 </script>
 
 <style>

@@ -5,12 +5,29 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
 	state: {
-		hasLogin: false,
 		loginProvider: "",
-		openid: null,
+		provider:{ 
+			login: {
+				id: 'weixin',
+				name: '微信登录'
+			},
+		},
 		testvuex:false,
         colorIndex: 0,
-        colorList: ['#FF5000','#00FF00','#0000FF']
+        colorList: ['#FF5000','#00FF00','#0000FF'],
+		
+		isLogin: false,
+		token: '',  
+		avatarUrl: '/static/shuijiao.jpg',
+		nickName: '点击登录',
+		username: '',
+		orgId: '',
+		openId: '',
+		appName: '',
+		isAgent: false,
+		agent: '',
+		expiresAt: 0,
+		level: -1
 	},
 	mutations: {
 		init(state, initParams) {
@@ -73,8 +90,8 @@ const store = new Vuex.Store({
 			state.orgId = ''
 			state.appName = ''
 		},
-		setOpenid(state, openid) {
-			state.openid = openid
+		setOpenId(state, openId) {
+			state.openId = openId
 		},
 		setTestTrue(state){
 			state.testvuex = true
@@ -98,17 +115,17 @@ const store = new Vuex.Store({
 			state
 		}) {
 			return await new Promise((resolve, reject) => {
-				if (state.openid) {
-					resolve(state.openid)
+				if (state.openId) {
+					resolve(state.openId)
 				} else {
 					uni.login({
 						success: (data) => {
 							commit('login')
-							setTimeout(function () { //模拟异步请求服务器获取 openid
-								const openid = '123456789'
-								console.log('uni.request mock openid[' + openid + ']');
-								commit('setOpenid', openid)
-								resolve(openid)
+							setTimeout(function () { //模拟异步请求服务器获取 openId
+								const openId = '123456789'
+								console.log('uni.request mock openid[' + openId + ']');
+								commit('setOpenid', openId)
+								resolve(openId)
 							}, 1000)
 						},
 						fail: (err) => {

@@ -1,5 +1,9 @@
 <template>
     <view>
+		<view class="camera " @click="goDetailPage('/circleFriends/add')">
+			<uni-icons type="camera" color="#ffffff" size="30" />
+		</view>
+		
 		<view class="uni-margin-wrap">
 			<swiper class="swiper" circular :indicator-dots="indicatorDots" :autoplay="autoplay" :interval="interval" :duration="duration">
 				<swiper-item>
@@ -17,39 +21,67 @@
 		<view class="uni-userinfo">
 			<view class="userinfo-name">
 				<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
-				<button @click="getUserInfo" v-if="hasUserInfo === false">登录</button>
+				<button @click="getUserInfo" size="mini" v-if="userInfo.isLogin">{{userInfo.nickName}}</button>
 				<!-- #endif -->
 				<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
-				<button type="primary" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="hasUserInfo === false">登录</button>
+				<button type="primary" size="mini" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="userInfo.isLogin">{{userInfo.nickName}}</button>
 				<!-- #endif -->
 				
-				<span v-if="hasUserInfo === true">
+				<text @click="toLogin">
 					{{userInfo.nickName || userInfo.email}}
-				</span>
+				</text>
 			</view>
 			<view class="userinfo-avatar-wapper">
-				<image class="userinfo-avatar" :src="userInfo.avatarUrl" @getuserinfo="mpGetUserInfo"></image>
+				<image class="userinfo-avatar" :src="userInfo.avatarUrl"></image>
 			</view>
 		</view>
 		
-		<uni-popup ref="showLoginPopup" :type="type" @change="change">
-			<view class="uni-share">
-				<text class="uni-share-title">登录</text>
-				<view class="uni-share-content">
-					ddsssss
-				</view>
-				<view class="uni-padding-wrap uni-common-mt">
-					<button type="primary" @click="cancel('LoginPopup')">登录</button>
-					<button type="default" @click="cancel('LoginPopup')">取消</button>
+		<view class="list p-rl-20 mb-100">
+			<view class="line d-flex-b" v-for="(item, index) of list" :key="index">
+				<image class="user-img-s" src="../../../static/shuijiao.jpg" mode=""></image>
+				<view class="line-content p-rl-10">
+					<view class="line-name d-flex-b">
+						{{ item.rootName }}
+						<view class="Share" @click="copyBtn(index)">分享</view>
+					</view>
+					<view class="line-text">{{ item.rootText }}</view>
+					<view class="line-imgAll d-flex f-row">
+						<image class="image" v-for="(val, i) of item.rootlist" :key="i" :src="val" mode=""></image>
+		
+						<image class="image" src="../../../static/shuijiao.jpg" mode=""></image>
+					</view>
+					<view class="line-bottom d-flex-b ">
+						<view class="date">{{ item.rootDate }}</view>
+						<view class="remark">
+							<view class="remark-off" @click.stop="remarkOff(index)">...</view>
+							<view class="d-flex remark-click" :class="remark == index ? 'remark-show' : 'remark-hidden'">
+								<view class="Tags" @click.stop="Tags">
+									<image class="min p-rl-10" :src="tags ? '../../../static/apiHL.png' : '../../../static/api.png'" mode=""></image>
+									<text class="p-rl-10">点赞</text>
+								</view>
+		
+								<view class="evaluate">
+									<image class="min p-rl-10" src="../../../static/api.png" mode=""></image>
+									<text class="p-rl-10">评论</text>
+								</view>
+							</view>
+						</view>
+					</view>
+					<view class="remark-item">
+						<view class="remark-tabs"><text></text></view>
+						<view class="remark-text"></view>
+					</view>
 				</view>
 			</view>
-		</uni-popup>
+		</view>
 		
+		
+			
     </view>
 </template>
 <script>
-    import setTabBar from '@/components/api-set-tabbar.nvue';
-	import uniPopup from '@/components/uni-popup/uni-popup.vue';
+	import Authorization from "@/common/Authorization"
+	import laoyiApi from "@/api/laoyi"
 	
 	import {
 		mapState,
@@ -58,8 +90,6 @@
 	
     export default {
         components: {
-            setTabBar,
-			uniPopup
         },
 		computed: {
 			...mapState({
@@ -68,8 +98,8 @@
 		},
         data() {
             return {
-				hasUserInfo: false,
-				userInfo: {},
+				userInfo: this.$store.state,
+				list: [],
                 navigateFlag: false,
 				background: ['color1', 'color2', 'color3'],
 				indicatorDots: true,
@@ -96,20 +126,15 @@
         onShow() {
             this.navigateFlag = false;
             this.leaveSetTabBarPage();
-			
-			console.log(this.userInfo)
-			
-			// #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO 
-			this.getUserInfo();
-			// #endif 
-			// #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ 
-			this.mpGetUserInfo();
-			// #endif
+			this.getList();
         },
         onHide() {
             this.leaveSetTabBarPage();
         },
         methods: {
+			toLogin() {
+				Authorization.toLogin()
+			},
 			changeIndicatorDots(e) {
 				this.indicatorDots = !this.indicatorDots
 			},
@@ -135,25 +160,22 @@
                     }
                 }
             },
-            goDetailPage(e) {
+            goDetailPage(path) {
                 if (this.navigateFlag) {
                     return;
                 }
                 this.navigateFlag = true;
-                if (e === 'set-tabbar') {
-                    this.showSetTabBarPage = true;
-                    return;
-                }
-                let url = ~e.indexOf('platform') ? e : '/pages/API/' + e + '/' + e;
+				
+				console.log(path)
+				path = path ? "/pages/tool" + path : path
                 uni.navigateTo({
-                    url: url
+                    url: path
                 });
             },
             leaveSetTabBarPage() {
                 setTimeout(() => {
                     this.navigateFlag = false;
                 }, 200)
-                this.showSetTabBarPage = false;
             },
 			// 获取用户信息 API 在小程序可直接使用，在 5+App 里面需要先登录才能调用
 			getUserInfo() {
@@ -205,47 +227,36 @@
 				});
 			},
 			mpGetUserInfo(result) {
-				console.log('mpGetUserInfo', result);
 				if (result.detail.errMsg !== 'getUserInfo:ok') {
 					uni.showModal({
-						title: '获取用户信息失败',
-						content: '错误原因' + result.detail.errMsg,
+						title: '您已拒绝微信授权',
+						content: '请允许微信授权登录，\n体验更多本小程序功能！',
 						showCancel: false
 					});
 					return;
+				}else {
+					Authorization.wx.login(this.loginDone)
 				}
-				this.userInfo = result.detail.userInfo;
-				this.hasUserInfo = true;
 			},
-			togglePopup(type, open) {
-				switch (type) {
-					case 'top':
-						this.content = '顶部弹出 popup'
-						break
-			
-					case 'bottom':
-						this.content = '底部弹出 popup'
-						break
-					case 'center':
-						this.content = '居中弹出 popup'
-						break
+			getList() {
+				console.log("get List")
+				if(this.$store.state.isLogin) {
+					laoyiApi.imageText.getList().then(result => {
+						console.log(result)
+					})
 				}
-				this.type = type
-				this.$nextTick(() => {
-					this.$refs['show' + open].open()
-				})
 			},
-			cancel(type) {
-				this.$refs['show' + type].close();
-			},
-			change(e) {
-				console.log('是否打开:' + e.show);
+			loginDone(bool) {
+				if(bool) {
+					this.getList()
+					console.log("true")
+				}
 			}
         }
     };
 </script>
 
-<style>
+<style lang="scss" scoped>
     @import '../../../common/uni-nvue.css';
 	
 	.uni-margin-wrap {
@@ -253,13 +264,25 @@
 		margin:0 0;
 	}
 	.swiper {
-		height: 400rpx;
+		height: 450rpx;
 	}
 	.swiper-item {
 		display: block;
-		height: 400rpx;
-		line-height: 300rpx;
+		height: 450rpx;
+		line-height: 450rpx;
 		text-align: center;
+	}
+	
+	.camera {
+		position: fixed;
+		width: 80rpx;
+		height: 80rpx;
+		top: 50rpx;
+		left: 0;
+		z-index: 989999;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 	
 	.swiper-list {
@@ -283,29 +306,32 @@
 	}
 	
 	.uni-userinfo {
-		margin-top: -30upx;
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: flex-start;
-		overflow: hidden;
+		position: fixed;
+		top: 380upx;
+		display: inline-block;
+		right: 0;
+		width: 300upx;
+		padding-right: 30upx;
+		.userinfo-name {
+			line-height: 128upx;
+			font-size: 30upx;
+			padding-right: 20upx;
+			float: left ;
+		}
+		.userinfo-avatar-wapper{
+			width: 128upx;
+			height: 128upx;
+			
+			.userinfo-avatar {
+				//border-radius: 128upx
+				border-radius: 10upx;
+				width: 100%;
+				height: 100%;
+				border: 4upx solid #FFFFFF ;
+			}
+		}
 	}
 	
-	.userinfo-name {
-		width: 100%;
-		line-height: 36upx;
-		font-size: 30upx;
-	}
-	.userinfo-avatar-wapper{
-		margin-right: 20upx;
-	}
-	.userinfo-avatar {
-		border-radius: 128upx;
-		width: 128upx;
-		border: 4upx solid #a8abae ;
-		height: 128upx;
-	}
 	
 	/* 底部分享 */
 	.uni-share {

@@ -2,8 +2,8 @@ import serviceAPI from './request'
 import store from '@/store'
 import Authorization from "@/common/Authorization"
 
-var baseUrl = 'https://api.wuhuhai.com'
-//var baseUrl = 'http://192.168.31.228:9999'
+//var baseUrl = 'https://api.wuhuhai.com'
+var baseUrl = 'http://localhost:9999'
 // #ifdef H5
 baseUrl = ''
 // #endif
@@ -14,9 +14,10 @@ serviceAPI.setConfig({
 // 请求拦截
 serviceAPI.interceptor.request = (config => {
     // 给header添加全局请求参数token
-    if (!config.header.Authorization) {
-        config.header.Authorization = store.state.token
-    }
+	config.header.Authorization = config.header.Authorization || store.state.token
+	config.data.orgId = config.data.orgId || store.state.orgId
+	config.data.appId = config.data.appId || store.state.appName
+	
     // 添加一个自定义的参数，默认异常请求都弹出一个toast提示
     if (config.toastError === undefined) {
         config.toastError = false

@@ -1,9 +1,28 @@
 <template>
-	<view class="my">
+	<view>
+		<view class="user">
+			<view class="user-avatar-wapper">
+				<image class="user-avatar" :src="userInfo.avatarUrl"></image>
+			</view>
+			<view class="user-title">
+				<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
+				<button @click="getUserInfo" size="mini" v-if="!userInfo.isLogin">{{userInfo.nickName}}</button>
+				<!-- #endif -->
+				<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
+				<button type="primary" size="mini" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="!userInfo.isLogin">{{userInfo.nickName}}</button>
+				<!-- #endif -->
+				<text v-if="userInfo.isLogin">{{userInfo.nickName}}</text>
+			</view>
+		</view>
 		<view class="my-top">
 			<view class="my-user">
-				<image class="img" src="../../../static/uni.png" mode=""></image>
+				<image class="uni-card__thumbnailimage-image" src="../../../static/uni.png" mode=""></image>
 				<view class="user-name">李嘉桦同学</view>
+				<uni-list>
+					<uni-list-item title="列表右侧带箭头" rightText="右侧文字" />
+					<uni-list-item :show-badge="true" title="列表右侧带箭头 + 角标" badge-text="12" />
+					<uni-list-item title="列表左侧带略缩图" thumb="https://img-cdn-qiniu.dcloud.net.cn/new-page/uni.png" />
+				</uni-list>
 			</view>
 		</view>
 		<view class="list-center m-rl-20 d-felx">
@@ -38,22 +57,45 @@
 </template>
 
 <script>
-export default {
-	data() {
-		return {};
-	}
-};
+	import Authorization from "@/common/Authorization"
+	
+	export default {
+		data() {
+			return {
+				userInfo: this.$store.state,
+			};
+		}
+	};
 </script>
 
 <style lang="scss" scoped>
-.my-top {
-	height: 400rpx;
-	background: #07c160;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
+.user {
+	background: #FF5000;
 	overflow: hidden;
+	height: 450upx;
+	padding: 20upx;
+	box-sizing: border-box;
+	flex-direction: row;
+	align-items: center;
+	.user-avatar-wapper{
+		width: 128upx;
+		height: 128upx;
+		
+		.user-avatar {
+			//border-radius: 128upx
+			border-radius: 10upx;
+			width: 100%;
+			height: 100%;
+			border: 4upx solid #F0F0F0 ;
+		}
+	}
+	.user-title {
+		line-height: 128upx;
+		font-size: 30upx;
+		padding-left: 20upx;
+		color: #FFFFFF;
+		float: left ;
+	}
 }
 .list-bottom {
 	box-shadow: 0 0 22rpx rgba(0, 0, 0, 0.18);
