@@ -33,6 +33,22 @@
 					}
 				}
 			}
+		}, {
+			"path": "pages/Publications/index",
+			"style": {
+				"navigationBarTitleText": "朋友圈",
+				"navigationStyle": "custom"
+				// "app-plus": {
+				// 	"titleNView": {
+				// 		"buttons": [{
+				// 			"text": "\ue534",
+				// 			"fontSrc": "/static/uni.ttf",
+				// 			"fontSize": "22px",
+				// 			"color": "#FFFFFF"
+				// 		}]
+				// 	}
+				// }
+			}
 		},
 		{
 			"path": "pages/tabBar/extUI/extUI",
@@ -49,11 +65,28 @@
 					}
 				}
 			}
+		}, {
+			"path": "pages/tabBar/Circles/Circles",
+			"style": {
+				"navigationBarTitleText": "朋友圈",
+				"navigationStyle": "custom",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}
 		},
 		{
-			"path": "pages/tabBar/template/template",
+			"path": "pages/tabBar/my/my",
 			"style": {
 				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom",
 				"app-plus": {
 					"titleNView": {
 						"buttons": [{
@@ -1147,12 +1180,12 @@
 				"selectedIconPath": "static/toolHL.png",
 				"text": "传播工具"
 			}, {
-				"pagePath": "pages/tabBar/extUI/extUI",
+				"pagePath": "pages/tabBar/Circles/Circles",
 				"iconPath": "static/eye.png",
 				"selectedIconPath": "static/eyeHL.png",
 				"text": "攻略"
 			}, {
-				"pagePath": "pages/tabBar/template/template",
+				"pagePath": "pages/tabBar/my/my",
 				"iconPath": "static/person.png",
 				"selectedIconPath": "static/personHL.png",
 				"text": "我的"

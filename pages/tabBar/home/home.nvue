@@ -157,15 +157,18 @@
                 }
             },
             goDetailPage(e) {
+				console.log(e)
                 if (this.navigateFlag) {
                     return;
                 }
                 this.navigateFlag = true;
                 if (typeof e === 'string') {
+					console.log(e)
                     uni.navigateTo({
                         url: '/pages/component/' + e + '/' + e
                     })
                 } else {
+					console.log(e)
                     uni.navigateTo({
                         url: e.url
                     })
