@@ -45,26 +45,16 @@ export default {
 		});	
 	},
 	toLogin() {
-		uni.login({
-		    provider: store.state.provider.login.id,
-		    // #ifdef MP-ALIPAY
-		    scopes: 'auth_user', //支付宝小程序需设置授权类型
-		    // #endif
-		    success: (res) => {
-		        console.log('login success:', res);
-				uni.getUserInfo({
-					success: (res) => {
-						console.log('userInfo success:', res);
-					},
-					fail: (err) => {
-					    console.log('userInfo fail:', err);
-					}
-				})
-		    },
-		    fail: (err) => {
-		        console.log('login fail:', err);
-		    }
-		});
+		uni.getUserInfo({
+			success: (res) => {
+				console.log('userInfo success:', res);
+				
+			},
+			fail: (err) => {
+			    console.log('userInfo fail:', err);
+			}
+		})
+		
 	},
 	checkLogin() {
 		let user = uni.getStorageSync("userInfo")
@@ -103,7 +93,10 @@ export default {
 			
 		   // 1.wx获取登录用户code
 			uni.login({
-				provider: 'weixin',
+				provider: store.state.provider.login.id,
+				// #ifdef MP-ALIPAY
+				scopes: 'auth_user', //支付宝小程序需设置授权类型
+				// #endif
 				success: function(loginRes) {
 					let code = loginRes.code;
 					userApi.authorization.wxLogon({code: code, orgId: store.state.orgId, appName: store.state.appName}).then(result => {
