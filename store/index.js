@@ -10,16 +10,68 @@ const store = new Vuex.Store({
 		openid: null,
 		testvuex:false,
         colorIndex: 0,
-        colorList: ['#FF0000','#00FF00','#0000FF']
+        colorList: ['#FF5000','#00FF00','#0000FF']
 	},
 	mutations: {
-		login(state, provider) {
-			state.hasLogin = true;
-			state.loginProvider = provider;
+		init(state, initParams) {
+			state.orgId = initParams.orgId
+			state.appName = initParams.appName
+			state.agent = initParams.agent
+			uni.setStorage({
+				key: "systemParams",
+				data: initParams
+			})
 		},
-		logout(state) {
-			state.hasLogin = false
-			state.openid = null
+		login(state, user) {
+			state.token = user.token
+			state.avatarUrl = user.avatarUrl
+			state.username = user.username
+			state.nickName = user.nickName
+			state.agent = user.agent
+			state.isAgent = user.isAgent
+			state.isLogin = true
+			state.level = user.level
+			state.expiresAt = user.expiresAt
+			
+			//let storeUser = uni.getStorageSync("userInfo") 
+			uni.setStorage({
+				key: "userInfo",
+				data: user
+			})
+			
+		}, 
+		refreshUserInfo(state, user) {
+			state.token = user.token
+			state.avatarUrl = user.avatarUrl
+			state.username = user.username
+			state.nickName = user.nickName
+			state.agent = user.agent
+			state.isAgent = user.isAgent
+			state.isLogin = true
+			state.level = user.level
+			state.expiresAt = user.expiresAt
+		},
+		refreshToken(state, token) {
+			state.token = token
+			uni.getStorage({
+				key: "userInfo",
+				success:(res) => {
+					res.token = token
+					uni.setStorage({
+						key: "userInfo",
+						data: res
+					})
+				}
+			})
+		}, 
+		logout(state) {  
+			state.isLogin = false
+			state.token = '' 
+			state.avatarUrl = ''
+			state.nickName = ''
+			state.username = ''
+			state.orgId = ''
+			state.appName = ''
 		},
 		setOpenid(state, openid) {
 			state.openid = openid

@@ -1,367 +1,81 @@
 <template>
-    <view class="uni-container">
-        <template v-if="showSetTabBarPage">
-            <set-tab-bar @unmount="leaveSetTabBarPage"></set-tab-bar>
-        </template>
-        <template v-else>
-            <view class="uni-header-logo">
-				杏草石膏姜枣藏sd
-                <image class="uni-header-image" src="/static/apiIndex.png"></image>
-            </view>
-            <view class="uni-hello-text">
-                <text class="hello-text">以下将演示uni-app接口能力，详细文档见：</text>
-                <u-link class="hello-link" :href="'https://uniapp.dcloud.io/api/'" :text="'https://uniapp.dcloud.io/api/'"
-                    :inWhiteList="true"></u-link>
-            </view>
-            <view class="uni-panel" v-for="(item, index) in list" :key="item.id">
-                <view class="uni-panel-h" :class="item.open ? 'uni-panel-h-on' : ''" @tap="triggerCollapse(index)">
-                    <text class="uni-panel-text">{{item.name}}</text>
-                    <text class="uni-panel-icon uni-icon" :class="item.open ? 'uni-panel-icon-on' : ''">&#xe581;</text>
-                </view>
-                <view class="uni-panel-c" v-if="item.open">
-                    <view class="uni-navigate-item" v-for="(item2,key) in item.pages" :key="key" :url="item.url" @click="goDetailPage(item2.url)">
-                        <text class="uni-navigate-text">{{item2.name ? item2.name : item2}}</text>
-                        <text class="uni-navigate-icon uni-icon">&#xe470;</text>
-                    </view>
-                </view>
-            </view>
-        </template>
+    <view>
+		<view class="uni-margin-wrap">
+			<swiper class="swiper" circular :indicator-dots="indicatorDots" :autoplay="autoplay" :interval="interval" :duration="duration">
+				<swiper-item>
+					<view class="swiper-item uni-bg-red">A</view>
+				</swiper-item>
+				<swiper-item>
+					<view class="swiper-item uni-bg-green">B</view>
+				</swiper-item>
+				<swiper-item>
+					<view class="swiper-item uni-bg-blue">C</view>
+				</swiper-item>
+			</swiper>
+		</view>
+		
+		<view class="uni-userinfo">
+			<view class="userinfo-name">
+				<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
+				<button @click="getUserInfo" v-if="hasUserInfo === false">登录</button>
+				<!-- #endif -->
+				<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
+				<button type="primary" open-type="getUserInfo" @getuserinfo="mpGetUserInfo" v-if="hasUserInfo === false">登录</button>
+				<!-- #endif -->
+				
+				<span v-if="hasUserInfo === true">
+					{{userInfo.nickName || userInfo.email}}
+				</span>
+			</view>
+			<view class="userinfo-avatar-wapper">
+				<image class="userinfo-avatar" :src="userInfo.avatarUrl" @getuserinfo="mpGetUserInfo"></image>
+			</view>
+		</view>
+		
+		<uni-popup ref="showLoginPopup" :type="type" @change="change">
+			<view class="uni-share">
+				<text class="uni-share-title">登录</text>
+				<view class="uni-share-content">
+					ddsssss
+				</view>
+				<view class="uni-padding-wrap uni-common-mt">
+					<button type="primary" @click="cancel('LoginPopup')">登录</button>
+					<button type="default" @click="cancel('LoginPopup')">取消</button>
+				</view>
+			</view>
+		</uni-popup>
+		
     </view>
 </template>
 <script>
-    import uLink from '@/components/uLink.vue'
     import setTabBar from '@/components/api-set-tabbar.nvue';
+	import uniPopup from '@/components/uni-popup/uni-popup.vue';
+	
+	import {
+		mapState,
+		mapMutations
+	} from 'vuex'
+	
     export default {
         components: {
-            uLink,
-            setTabBar
+            setTabBar,
+			uniPopup
         },
+		computed: {
+			...mapState({
+				loginProvider: state => state.loginProvider
+			})
+		},
         data() {
-            // 暂时这么写，后面看怎么优化。
-            let mediaPages = [{
-                    name: '图片',
-                    url: 'image'
-                },
-                // #ifdef APP-PLUS || MP-WEIXIN || MP-BAIDU || MP-QQ
-                {
-                    name: '录音',
-                    url: 'voice'
-                },
-                {
-                    name: '背景音频',
-                    url: 'background-audio'
-                },
-                // #endif
-                // #ifndef MP-ALIPAY
-                {
-                    name: '视频',
-                    url: 'video'
-                },
-                // #endif
-                // #ifndef H5
-                {
-                    name: '文件',
-                    url: 'file'
-                },
-                // #endif
-                // #ifndef H5 || MP-ALIPAY
-                {
-                    name: '保存媒体到本地',
-                    url: 'save-media'
-                }
-                // #endif
-            ];
-
-            const list = [{
-                    id: 'page',
-                    name: '界面',
-                    open: false,
-                    pages: [{
-                            name: '设置导航条',
-                            url: 'set-navigation-bar-title'
-                        },
-                        //#ifdef APP-PLUS
-                        {
-                            name: '原生子窗体',
-                            url: 'subnvue'
-                        },
-                        //#endif
-                        {
-                            name: '页面跳转',
-                            url: 'navigator'
-                        },
-                        //#ifndef MP-TOUTIAO
-                        {
-                            name: '设置TabBar',
-                            url: 'set-tabbar'
-                        },
-                        //#endif
-                        {
-                            name: '下拉刷新',
-                            url: 'pull-down-refresh'
-                        },
-                        {
-                            name: '创建动画',
-                            url: 'animation'
-                        },
-                        {
-                            name: '创建绘画',
-                            url: 'canvas'
-                        },
-                        {
-                            name: '节点信息',
-                            url: 'get-node-info'
-                        },
-                        {
-                            name: '节点布局交互状态',
-                            url: 'intersection-observer'
-                        },
-                        {
-                            name: '显示操作菜单',
-                            url: 'action-sheet'
-                        },
-                        {
-                            name: '显示模态弹窗',
-                            url: 'modal'
-                        },
-                        {
-                            name: '显示加载提示框',
-                            url: 'show-loading'
-                        },
-                        {
-                            name: '显示消息提示框',
-                            url: 'toast'
-                        }
-                    ]
-                },
-                {
-                    id: 'device',
-                    name: '设备',
-                    open: false,
-                    pages: [{
-                            name: '获取手机网络状态',
-                            url: 'get-network-type'
-                        },
-                        {
-                            name: '获取手机系统信息',
-                            url: 'get-system-info'
-                        },
-                        {
-                            name: '打电话',
-                            url: 'make-phone-call'
-                        },
-                        //#ifndef H5
-                        {
-                            name: '震动',
-                            url: 'vibrate'
-                        },
-                        {
-                            name: '添加手机联系人',
-                            url: 'add-phone-contact'
-                        },
-                        {
-                            name: '扫码',
-                            url: 'scan-code'
-                        },
-                        {
-                            name: '剪贴板',
-                            url: 'clipboard'
-                        },
-                        //#endif
-                        // #ifndef H5 || MP-ALIPAY
-                        {
-                            name: '屏幕亮度',
-                            url: 'brightness'
-                        },
-                        // #endif
-                        // #ifdef APP-PLUS || MP-WEIXIN || MP-QQ
-                        {
-                            name: '蓝牙',
-                            url: 'bluetooth'
-                        },
-                        {
-                            name: '生物认证',
-                            url: 'soter'
-                        },
-                        // #endif
-                        // #ifdef APP-PLUS || MP-WEIXIN
-                        {
-                            name: 'iBeacon',
-                            url: 'ibeacon'
-                        },
-                        // #endif
-                        {
-                            name: '监听加速度传感器',
-                            url: 'on-accelerometer-change'
-                        },
-                        {
-                            name: '监听罗盘数据',
-                            url: 'on-compass-change'
-                        },
-                        //#ifdef APP-PLUS
-                        {
-                            name: '监听距离传感器',
-                            url: '/platforms/app-plus/proximity/proximity'
-                        },
-                        {
-                            name: '监听方向传感器',
-                            url: '/platforms/app-plus/orientation/orientation'
-                        }
-                        //#endif
-                    ]
-                },
-                {
-                    id: 'network',
-                    name: '网络',
-                    open: false,
-                    pages: [{
-                            name: '发起一个请求',
-                            url: 'request'
-                        },
-                        {
-                            name: '上传文件',
-                            url: 'upload-file'
-                        },
-                        {
-                            name: '下载文件',
-                            url: 'download-file'
-                        }
-                    ]
-                },
-                {
-                    id: 'websocket',
-                    name: 'websocket',
-                    open: false,
-                    pages: [
-                        // #ifndef MP-ALIPAY
-                        {
-                            name: 'socketTask',
-                            url: 'websocket-socketTask'
-                        },
-                        // #endif
-                        {
-                            name: '全局websocket',
-                            url: 'websocket-global'
-                        }
-                    ]
-                },
-                {
-                    id: 'media',
-                    name: '媒体',
-                    open: false,
-                    pages: mediaPages
-                },
-                {
-                    id: 'location',
-                    name: '位置',
-                    open: false,
-                    pages: [{
-                            name: '获取当前位置',
-                            url: 'get-location'
-                        },
-                        {
-                            name: '使用地图查看位置',
-                            url: 'open-location'
-                        },
-                        // #ifndef MP-TOUTIAO
-                        {
-                            name: '使用地图选择位置',
-                            url: 'choose-location'
-                        }
-                        // #endif
-                        // #ifndef MP-QQ || MP-TOUTIAO
-                        ,
-                        {
-                            name: '地图控制',
-                            url: 'map'
-                        }
-                        // #endif
-                        // #ifdef APP-PLUS
-                        ,
-                        {
-                            name: '地图搜索',
-                            url: 'map-search'
-                        }
-                        // #endif
-                    ]
-                },
-                {
-                    id: 'storage',
-                    name: '数据',
-                    open: false,
-                    pages: [{
-                            name: '数据存储（key-value）',
-                            url: 'storage'
-                        },
-                        // #ifdef APP-PLUS
-                        {
-                            name: 'SQLite',
-                            url: 'sqlite'
-                        }
-                        // #endif
-                    ]
-                },
-                // #ifndef H5
-                {
-                    id: 'login',
-                    name: '登录',
-                    open: false,
-                    pages: [{
-                            name: '登录',
-                            url: 'login'
-                        },
-                        {
-                            name: '获取用户信息',
-                            url: 'get-user-info'
-                        }
-                    ]
-                },
-                {
-                    id: 'share',
-                    name: '分享',
-                    open: false,
-                    pages: [{
-                        name: '分享',
-                        url: 'share'
-                    }]
-                },
-                // #endif
-                // #ifdef APP-PLUS || MP-WEIXIN
-                {
-                    id: 'payment',
-                    name: '支付',
-                    open: false,
-                    pages: [{
-                        name: '发起支付',
-                        url: 'request-payment'
-                    }]
-                },
-                // #endif
-                // #ifdef APP-PLUS
-                {
-                    id: 'speech',
-                    name: '语音',
-                    open: false,
-                    pages: [{
-                        name: '语音识别',
-                        url: '/platforms/app-plus/speech/speech'
-                    }]
-                },
-                {
-                    id: 'push',
-                    name: '推送',
-                    open: false,
-                    pages: [{
-                        name: '推送',
-                        url: '/platforms/app-plus/push/push'
-                    }]
-                }
-                //#endif
-            ];
             return {
-                showSetTabBarPage: false,
-                list: list,
-                navigateFlag: false
+				hasUserInfo: false,
+				userInfo: {},
+                navigateFlag: false,
+				background: ['color1', 'color2', 'color3'],
+				indicatorDots: true,
+				autoplay: true,
+				interval: 2000,
+				duration: 500
             };
         },
         onShareAppMessage() {
@@ -382,11 +96,32 @@
         onShow() {
             this.navigateFlag = false;
             this.leaveSetTabBarPage();
+			
+			console.log(this.userInfo)
+			
+			// #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO 
+			this.getUserInfo();
+			// #endif 
+			// #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ 
+			this.mpGetUserInfo();
+			// #endif
         },
         onHide() {
             this.leaveSetTabBarPage();
         },
         methods: {
+			changeIndicatorDots(e) {
+				this.indicatorDots = !this.indicatorDots
+			},
+			changeAutoplay(e) {
+				this.autoplay = !this.autoplay
+			},
+			intervalChange(e) {
+				this.interval = e.target.value
+			},
+			durationChange(e) {
+				this.duration = e.target.value
+			},
             triggerCollapse(e) {
                 if (!this.list[e].pages) {
                     this.goDetailPage(this.list[e].url);
@@ -419,11 +154,227 @@
                     this.navigateFlag = false;
                 }, 200)
                 this.showSetTabBarPage = false;
-            }
+            },
+			// 获取用户信息 API 在小程序可直接使用，在 5+App 里面需要先登录才能调用
+			getUserInfo() {
+				uni.getUserInfo({
+					provider: this.loginProvider,
+					success: (result) => {
+						console.log('getUserInfo success', result);
+						this.hasUserInfo = true;
+						this.userInfo = result.userInfo;
+					},
+					fail: (error) => {
+						console.log('getUserInfo fail', error);
+						let content = error.errMsg;
+						if (~content.indexOf('uni.login')) {
+							content = '请在登录页面完成登录操作';
+						}
+			            // #ifndef APP-PLUS
+						uni.getSetting({
+							success: (res) => {
+								let authStatus = res.authSetting['scope.userInfo'];
+								if (!authStatus) {
+									uni.showModal({
+										title: '授权失败',
+										content: 'Hello uni-app需要获取您的用户信息，请在设置界面打开相关权限',
+										success: (res) => {
+											if (res.confirm) {
+												uni.openSetting()
+											}
+										}
+									})
+								} else {
+									uni.showModal({
+										title: '获取用户信息失败',
+										content: '错误原因' + content,
+										showCancel: false
+									});
+								}
+							}
+						})
+			            // #endif
+			            // #ifdef APP-PLUS
+			            uni.showModal({
+			            	title: '获取用户信息失败',
+			            	content: '错误原因' + content,
+			            	showCancel: false
+			            });
+			            // #endif
+					}
+				});
+			},
+			mpGetUserInfo(result) {
+				console.log('mpGetUserInfo', result);
+				if (result.detail.errMsg !== 'getUserInfo:ok') {
+					uni.showModal({
+						title: '获取用户信息失败',
+						content: '错误原因' + result.detail.errMsg,
+						showCancel: false
+					});
+					return;
+				}
+				this.userInfo = result.detail.userInfo;
+				this.hasUserInfo = true;
+			},
+			togglePopup(type, open) {
+				switch (type) {
+					case 'top':
+						this.content = '顶部弹出 popup'
+						break
+			
+					case 'bottom':
+						this.content = '底部弹出 popup'
+						break
+					case 'center':
+						this.content = '居中弹出 popup'
+						break
+				}
+				this.type = type
+				this.$nextTick(() => {
+					this.$refs['show' + open].open()
+				})
+			},
+			cancel(type) {
+				this.$refs['show' + type].close();
+			},
+			change(e) {
+				console.log('是否打开:' + e.show);
+			}
         }
     };
 </script>
 
 <style>
     @import '../../../common/uni-nvue.css';
+	
+	.uni-margin-wrap {
+		width: 100%;
+		margin:0 0;
+	}
+	.swiper {
+		height: 400rpx;
+	}
+	.swiper-item {
+		display: block;
+		height: 400rpx;
+		line-height: 300rpx;
+		text-align: center;
+	}
+	
+	.swiper-list {
+		margin-top: 40rpx;
+		margin-bottom: 0;
+	}
+	
+	.uni-common-mt{
+		margin-top:60rpx;
+		position:relative;
+	}
+	
+	.info {
+		position: absolute;
+		right:20rpx;
+	}
+	
+	.uni-padding-wrap {
+	    width:550rpx;
+	    padding:0 100rpx;
+	}
+	
+	.uni-userinfo {
+		margin-top: -30upx;
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: flex-start;
+		overflow: hidden;
+	}
+	
+	.userinfo-name {
+		width: 100%;
+		line-height: 36upx;
+		font-size: 30upx;
+	}
+	.userinfo-avatar-wapper{
+		margin-right: 20upx;
+	}
+	.userinfo-avatar {
+		border-radius: 128upx;
+		width: 128upx;
+		border: 4upx solid #a8abae ;
+		height: 128upx;
+	}
+	
+	/* 底部分享 */
+	.uni-share {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		flex-direction: column;
+		/* #endif */
+		background-color: #fff;
+	}
+	
+	.uni-share-title {
+		line-height: 60rpx;
+		font-size: 24rpx;
+		padding: 15rpx 0;
+		text-align: center;
+	}
+	
+	.uni-share-content {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 15px;
+	}
+	
+	.uni-share-content-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: column;
+		align-items: center;
+		width: 200rpx;
+	}
+	
+	.uni-share-content-image {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		width: 60rpx;
+		height: 60rpx;
+		overflow: hidden;
+		border-radius: 10rpx;
+	}
+	
+	.content-image {
+		width: 60rpx;
+		height: 60rpx;
+	}
+	
+	.uni-share-content-text {
+		font-size: 26rpx;
+		color: #333;
+		padding-top: 5px;
+		padding-bottom: 10px;
+	}
+	
+	.uni-share-btn {
+		height: 90rpx;
+		line-height: 90rpx;
+		font-size: 14px;
+		border-top-color: #f5f5f5;
+		border-top-width: 1px;
+		border-top-style: solid;
+		text-align: center;
+		color: #666;
+	}
 </style>

@@ -33,6 +33,7 @@
 					}
 				}
 			}
+<<<<<<< HEAD
 		}, {
 			"path": "pages/Publications/index",
 			"style": {
@@ -81,6 +82,40 @@
 					}
 				}
 			}
+=======
+		},
+		{
+			"path": "pages/tabBar/API/API",
+			"style": {
+				"navigationBarTitleText": "接口",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/tabBar/extUI/extUI",
+			"style": {
+				"navigationBarTitleText": "省钱攻略",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}
+>>>>>>> 02210cfdd78aff405be54d6063a82c7bcae4f1e0
 		},
 		{
 			"path": "pages/tabBar/my/my",
@@ -1179,6 +1214,12 @@
 				"iconPath": "static/tool.png",
 				"selectedIconPath": "static/toolHL.png",
 				"text": "传播工具"
+			}, 
+			{
+				"pagePath": "pages/tabBar/API/API",
+				"iconPath": "static/tool.png",
+				"selectedIconPath": "static/toolHL.png",
+				"text": "api"
 			}, {
 				"pagePath": "pages/tabBar/Circles/Circles",
 				"iconPath": "static/eye.png",
