@@ -109,6 +109,18 @@ form {
 .uni-common-mt{
 	margin-top:30upx;
 }
+.uni-common-m-all{
+	margin:30upx;
+}
+.uni-common-m-lr{
+	margin:0 30upx;
+}
+.uni-common-p-all{
+	padding:30upx;
+}
+.uni-common-p-lr{
+	padding:0 30upx;
+}
 /* 背景色 */
 .uni-bg-red{
 	background:#F76260; color:#FFF;

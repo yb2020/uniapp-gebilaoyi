@@ -342,8 +342,7 @@
 				{
 					"path": "circleFriends/add",
 					"style": {
-						"navigationBarTitleText": "朋友圈",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "新增朋友圈图文"
 					}
 				}
 			]

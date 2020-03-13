@@ -1,162 +1,285 @@
 <template>
-	<view>
-		<Header><view slot="right" class="header-r" @click="ClickEnd">发表</view></Header>
-		<textarea v-model="text" class="p-rl-20 input-text" maxlength="500" placeholder="这一刻的想法"></textarea>
-		<view class="p-rl-20 list flex">
-			<view class="item" v-for="(item, index) in imageAll" :key="index">
-				<image class="w-100 h-100" @click.stop="preview(index)" :src="item" mode=""></image>
-				<view class="close" @click.stop="close(index)"></view>
+	<view class="uni-container">
+		<form @submit="formSubmit" @reset="formReset">
+			<view class="uni-textarea">
+				<!--auto-height-->
+				<textarea name="content" v-model="form.content" class="uni-common-p-all" placeholder="请输入您要传播的文字" styl="height:150upx;" maxlength="500"/>
 			</view>
-			<view class="item item-add" @click.stop="openImage"></view>
-		</view>
+			
+			<view class="uni-common-mt">
+				<view class="uni-uploader">
+					<view class="uni-uploader-head">
+						<view class="uni-uploader-title">点击可预览选好的图片</view>
+						<view class="uni-uploader-info">{{form.imagesBase64Array.length}}/9</view>
+					</view>
+					<view class="uni-uploader-body">
+						<view class="uni-uploader__files">
+							<block v-for="(image,index) in form.imagesBase64Array" :key="index">
+								<view class="uni-uploader__file">
+									<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+								</view>
+							</block>
+							<view class="uni-uploader__input-box">
+								<view class="uni-uploader__input" @tap="chooseImage"></view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+			
+			<view class="uni-common-mt">
+				<uni-list>
+					<uni-list-item title="所在位置" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+				</uni-list>
+			</view>
+			
+			<view class="uni-btn-v">
+				<button form-type="submit" type="primary">保存图文</button>
+				<button type="default" form-type="reset">重置</button>
+			</view>
+		</form>
+
+
 	</view>
 </template>
 
 <script>
-import Header from '@/header/header.vue';
-import app from '@/App.vue'
-export default {
-	components: {
-		Header
-	},
-	data() {
-		return {
-			imageAll: [],
-			text: ''
-		};
-	},
-	methods: {
-		close(index) {
-			this.imageAll.splice(index, 1);
+	var graceChecker = require("@/common/graceChecker.js");
+	var util = require('@/common/util.js');
+	
+	var formatLocation = util.formatLocation;
+	
+	export default {
+		components: {
 		},
-		ClickEnd(){
-			app.globalData.test= '669'
+		data() {
+			return {
+				form: {
+					content: '',
+					imagesBase64Array: [],
+					position: '',
+					location: {}
+				},
+				imageList: [],
+				imageAll: [],
+				text: ''
+			};
 		},
-		preview(index) {
-			console.log(index);
-			uni.previewImage({
-				current:index,
-				urls: this.imageAll,
-				longPressActions: {
-					itemList: ['发送给朋友', '保存图片', '收藏'],
-					success: function(data) {
-						console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+		methods: {
+			formSubmit(e) {
+				var formData = e.detail.value;
+				
+				console.log('form发生了submit事件，携带数据为：' + JSON.stringify(formData))
+				//定义表单规则
+				var rule = [
+				    {name:"content", checkType : "notnull", checkRule:"",  errorMsg:"文字内容不能为！"}
+				];
+				//进行表单检查
+				var checkRes = graceChecker.check(formData, rule);
+				if(checkRes){
+				    uni.showToast({title:"验证通过!", icon:"none"});
+				}else{
+				    uni.showToast({ title: graceChecker.error, icon: "none" });
+					return false
+				}
+			},
+			formReset(e) {
+				console.log('清空数据')
+			},
+			chooseLocation() {
+				uni.chooseLocation({
+					success: (res) => {
+						this.hasLocation = true
+						this.location = formatLocation(res.longitude, res.latitude)
+						this.locationAddress = res.address
+						console.log(res)
+						console.log("位置：" + location)
+						console.log(res.address)
 					},
-					fail: function(err) {
-						console.log(err.errMsg);
+					fail(e) {
+						console.log(e)
+					}
+				})
+			},
+			close(index) {
+				this.imageAll.splice(index, 1);
+			},
+			ClickEnd(){
+				app.globalData.test= '669'
+			},
+			preview(index) {
+				console.log(index);
+				uni.previewImage({
+					current:index,
+					urls: this.imageAll,
+					longPressActions: {
+						itemList: ['发送给朋友', '保存图片', '收藏'],
+						success: function(data) {
+							console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+						},
+						fail: function(err) {
+							console.log(err.errMsg);
+						}
+					}
+				});
+			},
+			openImage() {
+				var that = this;
+				uni.chooseImage({
+					count: 9, //默认9
+					sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
+					sourceType: ['camera','album'], //从相册选择、摄像头
+					success: function(res) {
+						that.imageAll = res.tempFilePaths;
+						// console.log(res.tempFilePaths);
+					}
+				});
+			},
+			getImageData(filepath) {
+				console.log(filepath)
+				return new Promise((resolve, reject) => {
+					uni.getFileSystemManager().readFile({
+						filePath: filepath, //选择图片返回的相对路径
+						encoding: 'base64',
+	                    success: ress => {
+	                        let base64 = 'data:image/'+ filepath.substring(filepath.lastIndexOf(".")+1)+';base64,'  + ress.data
+							resolve(base64)
+						},
+						fail: e => {
+							resolve(false)
+						}
+					})
+				})
+			},
+			async chooseImage() {
+				var _this = this
+				// #ifdef APP-PLUS
+				// TODO 选择相机或相册时 需要弹出actionsheet，目前无法获得是相机还是相册，在失败回调中处理
+				if (this.sourceTypeIndex !== 2) {
+					let status = await this.checkPermission();
+					if (status !== 1) {
+						return;
 					}
 				}
-			});
-		},
-		openImage() {
-			var that = this;
-			uni.chooseImage({
-				count: 6, //默认9
-				sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
-				sourceType: ['album', 'camera'], //从相册选择、摄像头
-				success: function(res) {
-					that.imageAll = res.tempFilePaths;
-					// console.log(res.tempFilePaths);
+				// #endif
+			
+				if (this.imageList.length === 9) {
+					let isContinue = await this.isFullImg();
+					console.log("是否继续?", isContinue);
+					if (!isContinue) {
+						return;
+					}
 				}
-			});
+				uni.chooseImage({
+					sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
+					sourceType: ['camera','album'], //从相册选择、摄像头
+					count: this.imageList.length < 9 ? 9 - this.imageList.length : 0 ,
+					success: async res => {
+						this.imageList = this.imageList.concat(res.tempFilePaths);
+						for(var imagePath of this.imageList) {
+							var result = await _this.getImageData(imagePath)
+							if(result) {
+								this.form.imagesBase64Array.push(result)
+								console.log(this.form.imagesBase64Array)
+							}
+						}
+					},
+					fail: (err) => {
+						// #ifdef APP-PLUS
+						if (err['code'] && err.code !== 0 && this.sourceTypeIndex === 2) {
+							this.checkPermission(err.code);
+						}
+						// #endif
+						// #ifdef MP
+						uni.getSetting({
+							success: (res) => {
+								let authStatus = false;
+								switch (this.sourceTypeIndex) {
+									case 0:
+										authStatus = res.authSetting['scope.camera'];
+										break;
+									case 1:
+										authStatus = res.authSetting['scope.album'];
+										break;
+									case 2:
+										authStatus = res.authSetting['scope.album'] && res.authSetting['scope.camera'];
+										break;
+									default:
+										break;
+								}
+								if (!authStatus) {
+									uni.showModal({
+										title: '授权失败',
+										content: 'Hello uni-app需要从您的相机或相册获取图片，请在设置界面打开相关权限',
+										success: (res) => {
+											if (res.confirm) {
+												uni.openSetting()
+											}
+										}
+									})
+								}
+							}
+						})
+						// #endif
+					}
+				})
+			},
+			isFullImg() {
+				return new Promise((res) => {
+					uni.showModal({
+						content: "已经有9张图片了,是否清空现有图片？",
+						success: (e) => {
+							if (e.confirm) {
+								this.imageList = [];
+								this.form.imagesBase64Array = [];
+								res(true);
+							} else {
+								res(false)
+							}
+						},
+						fail: () => {
+							res(false)
+						}
+					})
+				})
+			},
+			async checkPermission(code) {
+				let type = code ? code - 1 : this.sourceTypeIndex;
+				let status = permision.isIOS ? await permision.requestIOS(sourceType[type][0]) :
+					await permision.requestAndroid(type === 0 ? 'android.permission.CAMERA' :
+						'android.permission.READ_EXTERNAL_STORAGE');
+		
+				if (status === null || status === 1) {
+					status = 1;
+				} else {
+					uni.showModal({
+						content: "没有开启权限",
+						confirmText: "设置",
+						success: function(res) {
+							if (res.confirm) {
+								permision.gotoAppSetting();
+							}
+						}
+					})
+				}
+		
+				return status;
+			}
 		}
-	}
-};
+	};
+	
 </script>
 
 <style lang="scss" scoped>
-.w-100 {
-	width: 100%;
-}
-.h-100 {
-	height: 100%;
-}
-.header-r {
-	height: 50rpx;
-	width: 90rpx;
-	color: #f1f1f1;
-	text-align: center;
-	background-color: #07c160;
-}
-.item {
-	width: 220rpx;
-	height: 220rpx;
+	@import '../../../common/uni-nvue.css';
 	
-	border-radius: 10rpx;
-	margin-top: 10rpx;
-	position: relative;
-	.close {
-		position: absolute;
-		width: 40rpx;
-		height: 40rpx;
-		top: 0;
-		right: 0;
-		background: #07c160;
-		border-radius: 10rpx;
+	.circles-friend-body {
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 0;
+		font-size: 14px;
+		background-color: #ffffff;
 	}
-}
-
-.p-rl-20 {
-	padding-left: 40rpx;
-	padding-right: 40rpx;
-}
-.flex {
-	display: flex;
-	justify-content: space-between;
-	flex-wrap: wrap;
-}
-.p-rl-20 {
-	padding-left: 40rpx;
-	padding-right: 40rpx;
-}
-
-.input-text {
-	width: 100%;
-	height: 300rpx;
-
-	overflow-y: auto;
-	box-sizing: border-box;
-	padding: 40rpx;
-}
-
-.list::after {
-	content: '';
-	display: block;
-	width: 220rpx;
-	height: 0;
-}
-
-.item-add {
-	width: 220rpx;
-	height: 220rpx;
-	background: #555555;
-	border-radius: 10rpx;
-	position: relative;
-}
-
-.item-add::after {
-	content: '';
-	display: block;
-	width: 10rpx;
-	height: 150rpx;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	border-radius: 10rpx;
-	background: aliceblue;
-}
-
-.item-add::before {
-	content: '';
-	display: block;
-	width: 150rpx;
-	height: 10rpx;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	border-radius: 10rpx;
-	background: aliceblue;
-}
+	
 </style>

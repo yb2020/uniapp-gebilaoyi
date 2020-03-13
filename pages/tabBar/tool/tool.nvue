@@ -20,7 +20,10 @@
 		
 		<view class="uni-userinfo">
 			<view class="userinfo-name">
-				<text @click="toLogin">
+				<text @click="toLogin" v-if="!userInfo.isLogin">
+					{{userInfo.nickName || userInfo.email}}
+				</text>
+				<text v-else>
 					{{userInfo.nickName || userInfo.email}}
 				</text>
 			</view>
