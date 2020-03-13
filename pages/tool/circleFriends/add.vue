@@ -9,14 +9,15 @@
 			<view class="uni-common-mt">
 				<view class="uni-uploader">
 					<view class="uni-uploader-head">
-						<view class="uni-uploader-title">点击可预览选好的图片</view>
-						<view class="uni-uploader-info">{{form.imagesBase64Array.length}}/9</view>
+						<view class="uni-uploader-title uni-text-small">点击图片预览，长按图片删除</view>
+						<view class="uni-uploader-info">{{imageList.length}}/9</view>
 					</view>
 					<view class="uni-uploader-body">
 						<view class="uni-uploader__files">
-							<block v-for="(image,index) in form.imagesBase64Array" :key="index">
+							<block v-for="(image,index) in imageList" :key="index">
+								<text v-if="deleteImgButtonShow" class="uni-badge-red" style="position: absolute; top: 0;right: 0;" @tap="deleteImage(index)">删除</text>
 								<view class="uni-uploader__file">
-									<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+									<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage" @longpress="prepareDeleteImage()"></image>
 								</view>
 							</block>
 							<view class="uni-uploader__input-box">
@@ -61,7 +62,7 @@
 					location: {}
 				},
 				imageList: [],
-				imageAll: [],
+				deleteImgButtonShow: false,
 				text: ''
 			};
 		},
@@ -101,39 +102,28 @@
 					}
 				})
 			},
-			close(index) {
-				this.imageAll.splice(index, 1);
-			},
-			ClickEnd(){
-				app.globalData.test= '669'
-			},
-			preview(index) {
-				console.log(index);
+			previewImage(e) {
+				var current = e.target.dataset.src
+				console.log(e.target)
 				uni.previewImage({
-					current:index,
-					urls: this.imageAll,
-					longPressActions: {
-						itemList: ['发送给朋友', '保存图片', '收藏'],
-						success: function(data) {
-							console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
-						},
-						fail: function(err) {
-							console.log(err.errMsg);
-						}
-					}
-				});
+					current: current,
+					urls: this.imageList,
+					// longPressActions: {
+					// 	itemList: ['发送给朋友', '保存图片', '收藏'],
+					// 	success: function(data) {
+					// 		console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+					// 	},
+					// 	fail: function(err) {
+					// 		console.log(err.errMsg);
+					// 	}
+					// }
+				})
 			},
-			openImage() {
-				var that = this;
-				uni.chooseImage({
-					count: 9, //默认9
-					sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
-					sourceType: ['camera','album'], //从相册选择、摄像头
-					success: function(res) {
-						that.imageAll = res.tempFilePaths;
-						// console.log(res.tempFilePaths);
-					}
-				});
+			deleteImage(index) {
+				this.imageList.splice(index, 1)
+			},
+			prepareDeleteImage() {
+				this.deleteImgButtonShow = true
 			},
 			getImageData(filepath) {
 				console.log(filepath)
@@ -174,15 +164,16 @@
 					sizeType: ['compressed'], //可以指定是原图还是压缩图，默认二者都有
 					sourceType: ['camera','album'], //从相册选择、摄像头
 					count: this.imageList.length < 9 ? 9 - this.imageList.length : 0 ,
-					success: async res => {
+					success: res => {
 						this.imageList = this.imageList.concat(res.tempFilePaths);
-						for(var imagePath of this.imageList) {
-							var result = await _this.getImageData(imagePath)
-							if(result) {
-								this.form.imagesBase64Array.push(result)
-								console.log(this.form.imagesBase64Array)
-							}
-						}
+						console.log(this.imageList)
+						// for(var imagePath of this.imageList) {
+						// 	var result = await _this.getImageData(imagePath)
+						// 	if(result) {
+						// 		this.form.imagesBase64Array.push(result)
+						// 		console.log(this.form.imagesBase64Array)
+						// 	}
+						// }
 					},
 					fail: (err) => {
 						// #ifdef APP-PLUS

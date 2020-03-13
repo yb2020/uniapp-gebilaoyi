@@ -9,49 +9,34 @@
 					{{userInfo.nickName}}
 				</text>
 				<text>
+					邀请好友{{userInfo.username}}
 					{{userInfo.username}}
 				</text>
 			</view>
 		</view>
-		<view class="my-top">
-			<view class="my-user">
-				<image class="uni-card__thumbnailimage-image" src="../../../static/uni.png" mode=""></image>
-				<view class="user-name">李嘉桦同学</view>
-				<uni-list>
-					<uni-list-item title="列表右侧带箭头" rightText="右侧文字" />
-					<uni-list-item :show-badge="true" title="列表右侧带箭头 + 角标" badge-text="12" />
-					<uni-list-item title="列表左侧带略缩图" thumb="https://img-cdn-qiniu.dcloud.net.cn/new-page/uni.png" />
-				</uni-list>
-			</view>
+		
+		<view class="uni-common-mt">
+			<uni-list>
+				<uni-list-item title="意见反馈" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+				<uni-list-item title="用户规范" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+				<uni-list-item title="联系我们" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+				<uni-list-item title="关于我们" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+				<uni-list-item title="价值观" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+			</uni-list>
 		</view>
-		<view class="list-center m-rl-20 d-felx">
-			<view class="gird line">
-				<image class="img" src="../../../static/uni.png" mode=""></image>
-				<view class="name">中心</view>
-			</view>
-			<view class="gird line">
-				<image class="img" src="../../../static/uni.png" mode=""></image>
-				<view class="name">中心</view>
-			</view>
-			<view class="gird line">
-				<image class="img" src="../../../static/uni.png" mode=""></image>
-				<view class="name">中心</view>
-			</view>
-			<view class="gird line">
-				<image class="img" src="../../../static/uni.png" mode=""></image>
-				<view class="name">中心</view>
-			</view>
+		
+		<view class="uni-common-mt">
+			<uni-list>
+				<uni-list-item title="其他服务" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
+			</uni-list>
 		</view>
-		<view class="list-bottom m-rl-20">
-			<view class="line d-felx">
-				<view class="name">6</view>
-				<view class="icon">6</view>
-			</view>
-			<view class="line d-felx">
-				<view class="name">6</view>
-				<view class="icon">6</view>
-			</view>
+		
+		<view class="uni-common-mt uni-common-mb" v-if="userInfo.isLogin">
+			<uni-list>
+				<uni-list-item title="退出登录" class="uni-center" :show-arrow="false" @tap="logout" />
+			</uni-list>
 		</view>
+		
 		<Login ref="login" @close="closeLogin" @done="doneLogin"></Login>
 		
 	</view>
