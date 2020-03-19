@@ -117,8 +117,12 @@
             this.navigateFlag = false
             this.leaveSetTabBarPage()
 			
+			
 			if(Authorization.checkLogin()) {
-				this.getList()
+				if(this.page.currentPage === 1) {
+					this.getList()
+				}
+				
 			}else {
 				this.initList()
 			}

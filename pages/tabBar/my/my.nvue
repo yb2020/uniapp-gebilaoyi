@@ -9,7 +9,7 @@
 					{{userInfo.nickName}}
 				</text>
 				<text>
-					邀请好友{{userInfo.username}}
+					<!-- 邀请好友{{userInfo.username}} -->
 					{{userInfo.username}}
 				</text>
 			</view>

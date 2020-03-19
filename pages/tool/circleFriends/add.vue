@@ -29,11 +29,11 @@
 				</view>
 			</view>
 			
-			<view class="uni-common-mt">
+			<!-- <view class="uni-common-mt">
 				<uni-list>
 					<uni-list-item title="所在位置" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
 				</uni-list>
-			</view>
+			</view> -->
 			
 			<view class="uni-btn-v">
 				<button :loading="isLoading" :disabled="isLoading" form-type="submit" type="primary">{{submitBtnText}}</button>
