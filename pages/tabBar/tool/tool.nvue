@@ -32,47 +32,20 @@
 			</view>
 		</view>
 		
-		<view class="list p-rl-20 mb-100">
-			<view class="line d-flex-b" v-for="(item, index) of list" :key="index">
-				<image class="user-img-s" src="../../../static/shuijiao.jpg" mode=""></image>
-				<view class="line-content p-rl-10">
-					<view class="line-name d-flex-b">
-						{{ item.rootName }}
-						<view class="Share" @click="copyBtn(index)">分享</view>
-					</view>
-					<view class="line-text">{{ item.rootText }}</view>
-					<view class="line-imgAll d-flex f-row">
-						<image class="image" v-for="(val, i) of item.rootlist" :key="i" :src="val" mode=""></image>
+		<list class="scroll-v list" enableBackToTop="true" scroll-y loadmoreoffset="15" @loadmore="loadMore()">
+			<cell v-for="(imageText,index) in page.list" :key="index">
+				<Item :row="imageText" :user="userInfo" :canvasId="canvasId" @changeCanvasHeight="changeCanvasHeight"></Item>
+			</cell>
+			<view class="uni-loadmore" v-if="page.isLoading">{{page.loadingText}}</view>
+		</list>
 		
-						<image class="image" src="../../../static/shuijiao.jpg" mode=""></image>
-					</view>
-					<view class="line-bottom d-flex-b ">
-						<view class="date">{{ item.rootDate }}</view>
-						<view class="remark">
-							<view class="remark-off" @click.stop="remarkOff(index)">...</view>
-							<view class="d-flex remark-click" :class="remark == index ? 'remark-show' : 'remark-hidden'">
-								<view class="Tags" @click.stop="Tags">
-									<image class="min p-rl-10" :src="tags ? '../../../static/apiHL.png' : '../../../static/api.png'" mode=""></image>
-									<text class="p-rl-10">点赞</text>
-								</view>
 		
-								<view class="evaluate">
-									<image class="min p-rl-10" src="../../../static/api.png" mode=""></image>
-									<text class="p-rl-10">评论</text>
-								</view>
-							</view>
-						</view>
-					</view>
-					<view class="remark-item">
-						<view class="remark-tabs"><text></text></view>
-						<view class="remark-text"></view>
-					</view>
-				</view>
-			</view>
+		<!-- 用于一键保存并生成带有二维码的图片，不可删除 -->
+		<view style="position:fixed;top:999999999999999999999rpx;">
+			<canvas :style="{ width: '100vw', height: canvasHeight }" :canvas-id="canvasId" ></canvas>
 		</view>
 		
 		<Login ref="login" @close="closeLogin" @done="doneLogin"></Login>
-		
 			
     </view>
 </template>
@@ -80,6 +53,8 @@
 	import Authorization from "@/common/Authorization"
 	import laoyiApi from "@/api/laoyi"
 	import Login from "@/pages/components/login"
+	import Item from '@/pages/components/circleFriends/item'
+	import { formatTime, parseTime } from '@/utils'
 	
 	import {
 		mapState,
@@ -88,29 +63,45 @@
 	
     export default {
         components: {
-			Login
+			Login, Item
         },
-		computed: {
-			...mapState({
-				loginProvider: state => state.loginProvider
-			})
-		},
         data() {
             return {
 				userInfo: this.$store.state,
-				list: [],
+				page: {
+					refreshing: false,
+					list: [],
+					currentPage: 1,
+					pageSize: 4,
+					pages: 0,
+					total: 0,
+					isLoading: false,
+					loadingText: '上拉加载更多数据。。。'
+				},
+				canvasId: 'reportCanvas',
+				canvasHeight: '100vh',
                 navigateFlag: false,
 				isHiddenTabBar: true,
-				background: ['color1', 'color2', 'color3'],
 				indicatorDots: true,
 				autoplay: true,
 				interval: 2000,
 				duration: 500
             };
         },
+		onReachBottom() {
+			this.page.isLoading = true
+			if(this.page.currentPage < this.page.pages) {
+				this.page.currentPage += 1
+				setTimeout(() => {
+					this.getList()
+				}, 300);
+			}else {
+				this.page.loadingText = '没有更多的数据了'
+			}
+		},
         onShareAppMessage() {
             return {
-                title: '欢迎体验uni-app',
+                title: this.userInfo.nickName + '邀请你免费体验一键转发工具',
                 path: '/pages/tabBar/tool/tool'
             };
         },
@@ -121,14 +112,15 @@
         },
         onLoad() {
         },
-        onReady() {
-        },
         onShow() {
-            this.navigateFlag = false;
-            this.leaveSetTabBarPage();
+			//console.log("onShow1111")
+            this.navigateFlag = false
+            this.leaveSetTabBarPage()
 			
 			if(Authorization.checkLogin()) {
-				this.getList();
+				this.getList()
+			}else {
+				this.initList()
 			}
 
         },
@@ -136,6 +128,9 @@
             this.leaveSetTabBarPage();
         },
         methods: {
+			changeCanvasHeight(height) {
+				this.canvasHeight = height + "px"
+			},
 			toLogin() {
 				if(!Authorization.checkLogin()) {
 					this.toggleHideTabBar()
@@ -181,7 +176,6 @@
                 }
                 this.navigateFlag = true;
 				
-				console.log(path)
 				path = path ? "/pages/tool" + path : path
                 uni.navigateTo({
                     url: path
@@ -192,13 +186,42 @@
                     this.navigateFlag = false;
                 }, 200)
             },
+			initList() {
+				this.page.currentPage = 1
+				this.page.pages = 0
+				this.page.pageSize = 4
+				this.page.list = []
+				this.page.isLoading = false
+				this.page.loadingText = '上拉加载更多数据。。。'
+			},
 			getList() {
-				console.log("get List")
 				if(this.$store.state.isLogin) {
-					laoyiApi.imageText.getList().then(result => {
-						console.log(result)
+					laoyiApi.personal.imageText.getList({
+						currentPage: this.page.currentPage,
+						pageSize: this.page.pageSize
+					}).then(result => {
+						var tmpPage = result.data
+						tmpPage.list.forEach(row => {
+						  row.createDate = parseTime(row.createDate, '{y}-{m}-{d} {h}:{i}:{s}')
+						  row.modifyDate = formatTime(row.modifyDate)
+						})
+						this.page.total = tmpPage.total
+						this.page.currentPage = tmpPage.pageNum
+						this.page.pageSize = tmpPage.pageSize
+						this.page.pages = tmpPage.pages
+						this.page.list = this.page.list.concat(JSON.parse(JSON.stringify(tmpPage.list))) // 断开引用
+						
+						this.page.loadingText = '上拉加载更多数据。。。'
+						this.page.isLoading = false
+						uni.stopPullDownRefresh();
 					})
 				}
+			},
+			loadMore(e) {
+			    setTimeout(() => {
+					console.log("aaaa")
+			       //this.getList();
+			    }, 500)
 			},
 			doneLogin(bool) {
 				if(bool) {
@@ -213,6 +236,7 @@
 				}
 				this.isHiddenTabBar = !this.isHiddenTabBar
 			},
+			
         }
     };
 </script>
@@ -293,5 +317,61 @@
 		}
 	}
 	
+	.update-tips-text {
+	    font-size: 14px;
+	    color: #ffffff;
+	}
+	
+	.refresh {
+	    width: 750upx;
+	    height: 64px;
+	    justify-content: center;
+	}
+	
+	.refresh-view {
+	    flex-direction: row;
+	    flex-wrap: nowrap;
+	    align-items: center;
+	    justify-content: center;
+	}
+	
+	.refresh-icon {
+		width: 30px;
+		height: 30px;
+		transition-duration: .5s;
+		transition-property: transform;
+		transform: rotate(0deg);
+		transform-origin: 15px 15px;
+	}
+	
+	.refresh-icon-active {
+		transform: rotate(180deg);
+	}
+	
+	.loading-icon {
+		width: 20px;
+		height: 20px;
+		margin-right: 5px;
+		color: #999999;
+	}
+	
+	.loading-text {
+	    margin-left: 2px;
+	    font-size: 16px;
+	    color: #999999;
+	}
+	
+	.loading-more {
+	    align-items: center;
+	    justify-content: center;
+	    padding-top: 10px;
+	    padding-bottom: 10px;
+	    text-align: center;
+	}
+	
+	.loading-more-text {
+	    font-size: 28upx;
+	    color: #999;
+	}
 	
 </style>

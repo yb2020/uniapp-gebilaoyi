@@ -40,6 +40,11 @@ const store = new Vuex.Store({
 				data: initParams
 			})
 		},
+		setInit(state, initParams) {
+			state.orgId = initParams.orgId
+			state.appName = initParams.appName
+			state.agent = initParams.agent
+		},
 		login(state, user) {
 			state.token = user.token
 			state.avatarUrl = user.avatarUrl
@@ -82,14 +87,18 @@ const store = new Vuex.Store({
 				}
 			})
 		}, 
-		logout(state) {  
+		logout(state) {
 			state.isLogin = false
 			state.token = '' 
-			state.avatarUrl = ''
-			state.nickName = ''
+			state.avatarUrl = '/static/user.png'
+			state.nickName = '点击登录'
 			state.username = ''
-			state.orgId = ''
-			state.appName = ''
+			state.expiresAt = 0
+			//state.orgId = ''
+			//state.appName = ''
+			uni.removeStorage({
+				key: "userInfo"
+			})
 		},
 		setOpenId(state, openId) {
 			state.openId = openId

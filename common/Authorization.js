@@ -49,7 +49,7 @@ export default {
 		
 		let nowTime = new Date().getTime()
 		
-		if(user && user.isLogin && nowTime < user.expiresAt) {
+		if(user && user.isLogin && nowTime < (user.expiresAt - 500)) {
 			user = JSON.parse(JSON.stringify(user))
 			store.commit("refreshUserInfo", user)
 			return true
@@ -57,6 +57,15 @@ export default {
 		return false
 	},
 	wx:{
+		logout() {
+			uni.showLoading({
+				title: '注销登录中...'
+			});
+			userApi.authorization.personalLogout().then(result => {
+				store.commit("logout")
+				uni.hideLoading()
+			})
+		},
 		login() {
 			let _this = this;
 			

@@ -33,7 +33,7 @@
 		
 		<view class="uni-common-mt uni-common-mb" v-if="userInfo.isLogin">
 			<uni-list>
-				<uni-list-item title="退出登录" class="uni-center" :show-arrow="false" @tap="logout" />
+				<uni-list-item title="退出登录" class="uni-center" :show-arrow="false" @tap="toLogout" />
 			</uni-list>
 		</view>
 		
@@ -45,6 +45,7 @@
 <script>
 	import Authorization from "@/common/Authorization"
 	import Login from "@/pages/components/login"
+	import { mapMutations } from 'vuex'
 	
 	export default {
 		components: {
@@ -60,6 +61,9 @@
 			Authorization.checkLogin()
 		},
 		methods: {
+			...mapMutations({
+				logout: 'logout'
+			}),
 			toLogin() {
 				if(!Authorization.checkLogin()) {
 					this.toggleHideTabBar()
@@ -71,9 +75,7 @@
 				this.toggleHideTabBar()
 			},
 			doneLogin(bool) {
-				if(bool) {
-					this.getList()
-				}
+				console.log(bool)
 			},
 			toggleHideTabBar() {
 				if (this.isHiddenTabBar) {
@@ -83,6 +85,9 @@
 				}
 				this.isHiddenTabBar = !this.isHiddenTabBar
 			},
+			toLogout() {
+				Authorization.wx.logout()
+			}
 		}
 	};
 </script>

@@ -40,32 +40,24 @@
 			//记录当前登录
 			Authorization.getProvider()
 			
-			if(!systemParams && scene) {
+			if(scene) { //只要有scene,优先重新获取
 				var {paramters} = await ACLApi.qr.app.getByIdName(scene)
 				store.commit("init",{
 					orgId: ACLApi.qr.app.utils.get(paramters, "orgId") || "8041b3e636d54b8db78f49572ba414bf",
 					appName: ACLApi.qr.app.utils.get(paramters, "appId") || "yiblog",
 					agent: ACLApi.qr.app.utils.get(paramters, "agent") || ""
 				})
-			} else {
+			}else if(systemParams) {
+				store.commit("setInit", systemParams)
+			}else { //两个都为空，搜索进的小程序？
 				store.commit("init",{
-					orgId: ACLApi.qr.app.utils.get(systemParams, "orgId") || "8041b3e636d54b8db78f49572ba414bf",
-					appName: ACLApi.qr.app.utils.get(systemParams, "appId") || "yiblog",
-					agent: ACLApi.qr.app.utils.get(systemParams, "agent") || ""
+					orgId: "8041b3e636d54b8db78f49572ba414bf",
+					appName: "yiblog",
+					agent: ""
 				})
 			}
+			
         },
-		methods: {
-			getPhoneHeight() {
-				let that = this;
-				uni.getSystemInfo({
-					success: function(res) {
-						console.log(res)
-						that.globalData.phoneHeight = res.statusBarHeight;
-					}
-				});
-			}	
-		},
         onShow: function() {
             console.log('App Show')
         },

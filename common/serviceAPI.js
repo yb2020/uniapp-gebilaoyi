@@ -3,7 +3,7 @@ import store from '@/store'
 import Authorization from "@/common/Authorization"
 
 //var baseUrl = 'https://api.wuhuhai.com'
-var baseUrl = 'http://localhost:9999'
+var baseUrl = 'http://192.168.1.117:9999'
 // #ifdef H5
 baseUrl = ''
 // #endif
@@ -15,6 +15,9 @@ serviceAPI.setConfig({
 serviceAPI.interceptor.request = (config => {
     // 给header添加全局请求参数token
 	config.header.Authorization = config.header.Authorization || store.state.token
+	if(!config.data) {
+		config.data = {}
+	}
 	config.data.orgId = config.data.orgId || store.state.orgId
 	config.data.appId = config.data.appId || store.state.appName
 	

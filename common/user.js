@@ -27,6 +27,12 @@ export default {
 			  data: params
 			})
 		},
+		personalLogout() {
+			return serviceAPI.request({
+			  url: serviceId + '/user/authorization/personalLogout',
+			  method: 'get'
+			})
+		},
 		getWxUserInfo(params) {
 			return serviceAPI.request({
 			  url: serviceId + '/user/authorization/getWxUserInfo',

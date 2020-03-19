@@ -19,6 +19,23 @@
 			}
 		},
 		{
+			"path": "pages/laoyi/index",
+			"style": {
+				"navigationBarTitleText": "跳转中",
+				"app-plus": {
+					"bounce": "vertical",
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}
+		},
+		{
 			"path": "pages/tabBar/tool/tool",
 			"style": {
 				"navigationBarTitleText": "传播工具",
@@ -343,6 +360,12 @@
 					"path": "circleFriends/add",
 					"style": {
 						"navigationBarTitleText": "新增朋友圈图文"
+					}
+				},
+				{
+					"path": "circleFriends/detail",
+					"style": {
+						"navigationBarTitleText": "图文详情"
 					}
 				}
 			]

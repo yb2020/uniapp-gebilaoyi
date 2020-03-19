@@ -1,0 +1,362 @@
+<template>
+	<!-- remove list-cell layer fix android 4.x overflow limit error: 28 layers! -->
+	<!-- <view class="list-cell view" @click="click"></view> -->
+	<view class="media-item view" :style="{flexDirection: 'column' }" hover-class="media-item-hover" @click="click">
+		<!-- <view class="view" :style="options.article_type === 2 ? 'flex-direction: row';" :class="{'media-image-right': options.article_type === 2, 'media-image-left': options.article_type === 1}"> -->
+		<!-- TODO 在支付宝小程序下 需要用 style 覆盖标签的默认样式 -->
+		
+		<view class="view">
+			<view class="view userinfo-avatar-wapper">
+				<image class="userinfo-avatar" :src="user.avatarUrl"></image>
+			</view>
+			<view class="view">
+				<text class="media-title" :class="{'media-title2': true}">{{user.nickName}}</text>
+			</view>
+			<view class="view" @click="toDetail">
+				<text class="media-title" :class="{'media-title2': true}">{{row.content}}</text>
+			</view>
+			<view class="uni-uploader-body">
+				<view class="uni-uploader__files">
+					<block v-for="(image,index) of row.imagesBase64Array" :key="index">
+						<view class="uni-uploader__file">
+							<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+						</view>
+					</block>
+				</view>
+			</view>
+			<view class="media-foot flex-row" style="flex-direction: row;">
+				<view class="media-info flex-row" style="flex-direction: row;">
+					<text class="info-text">{{row.modifyDate}}</text>
+				</view>
+				<view class="operation-view">
+					<text @tap="copyText(row.content)">复制文字</text>
+					<text v-if="row.creator === user.username" @tap="onePressSave(row)">一键保存</text>
+					<text v-if="row.creator !== user.username" @tap="onePressRelay(row)">一键转发</text>
+				</view>
+			</view>
+			<view class="media-item-line" style="position: absolute;"></view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import base64src from '@/common/base64src'
+	import laoyiApi from '@/api/laoyi'
+	import ACLApi from '@/common/ACL'
+	import canvasUtil from '@/common/canvasUtil'
+	import {createUniqueString} from '@/utils'
+	import toolUtils from '@/pages/components/circleFriends/utils'
+	
+	export default {
+		props: {
+			row: {
+				type: Object,
+				default: function(e) {
+					return {}
+				}
+			},
+			user: {
+				type: Object,
+				default: function(e) {
+					return {}
+				}
+			},
+			canvasId: {
+				type: String,
+				default: ''
+			}
+		},
+		methods: {
+			toDetail() {
+				uni.navigateTo({
+					url: '/pages/tool/circleFriends/detail?id=' + this.row.id
+				})
+			},
+			copyText(content) {
+				uni.setClipboardData({
+				    data: content,
+				    success: function () {
+						uni.showToast({
+						    title: "文字已经复制，长按粘贴即可使用！" ,
+						    duration: 2000,
+						    icon: 'none'
+						})
+				    }
+				});
+			},
+			onePressRelay(row) {
+				uni.showLoading({
+					title: '转发中...'
+				})
+				laoyiApi.personal.imageText.relay({id: row.id}).then(result => {
+					uni.hideLoading()
+					uni.showToast({
+						title: result.message,
+						duration: 2000,
+						success() {
+							console.log("跳转到自己的界面")
+						}
+					})
+				})
+				
+				return false 
+				if(row.creator === this.user.username) {
+					uni.showToast({
+					    title: "自己不能转发自己的图文！" ,
+					    duration: 2000,
+					    icon: 'none'
+					})
+				}else {
+					
+				}
+			},
+			async onePressSave(row) {
+				let _this = this
+				_this.copyText(row.content)
+				
+				let j = 0 //计算成功保存的张数
+				let size = row.imagesBase64Array.length
+				//获取二维码
+				let qrCodeObject = await laoyiApi.personal.imageText.getImageTextQrCode({id: row.id})
+				const fsm = uni.getFileSystemManager()
+				
+				for(var i = 0 ; i < size ; i ++) {
+					//图片
+					let path = await base64src(row.imagesBase64Array[i], createUniqueString())
+					
+					if (i === 0) {
+						//获取图片大小
+						let imageInfo = await canvasUtil.image.getImageInfo(path);
+						let imageWidth = imageInfo.width
+						let imageHeight = imageInfo.height
+						let scale = imageHeight/imageWidth
+						//console.log(“宽长比” +scale)
+						
+						//获取设备宽高，设置canvas画布的高度
+						let systemInfo = await canvasUtil.device.getSystemInfo()
+						let canvasHeight = systemInfo.width * scale + 120 //120是给二维码留的
+						this.$emit("changeCanvasHeight" , canvasHeight)
+						
+						let canvasId = await toolUtils.canvas.imageToPlaypill(this.canvasId, path, qrCodeObject.data.wxQrFile, qrCodeObject.data.wxMpQrFile)
+						//避免缓存无限膨胀，删除图片
+						fsm.removeSavedFile({
+							filePath: path
+						})
+						
+						path = await canvasUtil.canvas.getCanvasPath(canvasId)
+					}
+					
+					var isCompleted = await _this.saveImage(path)
+					if(isCompleted) {
+						j ++ 
+						//避免缓存无限膨胀，删除图片
+						fsm.removeSavedFile({
+							filePath: path
+						})
+					}
+				}
+				
+				if(j === size) {
+					uni.showToast({
+						title: '保存成功'
+					})
+				}else {
+					uni.showToast({
+						icon: 'none',
+						title: '成功保存' + j + '张图片，'+(size - j)+'张保存失败！'
+					})
+				}
+			},
+			async saveImage(path) {
+				return new Promise((resolve, reject) => {
+					uni.saveImageToPhotosAlbum({
+						filePath: path,
+						success: (res) => {
+							resolve(true)
+						},
+						fail: e => {
+							resolve(false)
+						}
+					})
+				})
+			},
+			previewImage(e) {
+				var current = e.target.dataset.src
+				uni.previewImage({
+					current: current,
+					urls: this.row.imagesBase64Array,
+					longPressActions: {
+						itemList: ['发送给朋友', '保存图片', '收藏'],
+						success: function(data) {
+							//console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+						},
+						fail: function(err) {
+							console.log(err.errMsg);
+						}
+					}
+				})
+			},
+			click() {
+				this.$emit('click');
+			},
+			close(e) {
+				this.$emit('close');
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.view {
+		flex-direction: column;
+	}
+
+	.flex-row {
+		flex-direction: row;
+	}
+
+	.flex-col {
+		flex-direction: column;
+	}
+
+	.list-cell {
+		width: 750upx;
+		padding: 0 30upx;
+	}
+
+	.uni-list-cell-hover {
+		background-color: #eeeeee;
+	}
+	
+	.userinfo-avatar-wapper{
+		width: 128upx;
+		height: 128upx;
+		
+		.userinfo-avatar {
+			border-radius: 128upx;
+			width: 100%;
+			height: 100%;
+			border: 4upx solid #F0F0F0 ;
+		}
+	}
+
+	.media-item {
+		position: relative;
+		flex: 1;
+		flex-direction: column;
+		/* border-bottom-width: 1upx;
+		border-bottom-style: solid;
+		border-bottom-color: #ebebeb; */
+		padding: 20upx 30upx 21upx 30upx;
+	}
+
+    .media-item-hover{
+        background-color: #eee;
+    }
+
+	.media-item-line {
+		position: absolute;
+		left: 30upx;
+		right: 30upx;
+		bottom: 0;
+		height: 1upx;
+		background-color: #ebebeb;
+	}
+
+	.media-image-right {
+		flex-direction: row;
+	}
+
+	.media-image-left {
+		flex-direction: row-reverse;
+	}
+
+	.media-title {
+		flex: 1;
+	}
+
+	.media-title {
+		lines: 3;
+		text-overflow: ellipsis;
+		font-size: 30upx;
+		color: #555555;
+	}
+
+	.media-title2 {
+		flex: 1;
+		margin-top: 6upx;
+		line-height: 40upx;
+	}
+
+	.image-section {
+		margin-top: 20upx;
+		flex-direction: row;
+		justify-content: space-between;
+	}
+
+	.image-section-right {
+		margin-top: 0upx;
+		margin-left: 10upx;
+		width: 225upx;
+		height: 146upx;
+	}
+
+	.image-section-left {
+		margin-top: 0upx;
+		margin-right: 10upx;
+		width: 225upx;
+		height: 146upx;
+	}
+
+	.image-list1 {
+		width: 690upx;
+		height: 481upx;
+	}
+
+	.image-list2 {
+		width: 225upx;
+		height: 146upx;
+	}
+
+	.image-list3 {
+		width: 225upx;
+		height: 146upx;
+	}
+
+	.media-info {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.info-text {
+		margin-right: 20upx;
+		color: #999999;
+		font-size: 24upx;
+	}
+
+	.media-foot {
+		margin-top: 25upx;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.operation-view {
+		position: relative;
+		align-items: center;
+		flex-direction: row;
+		width: 240upx;
+		height: 30upx;
+		font-size: 24upx;
+		color: #0574e3;
+		margin-right: 20rpx;
+		line-height: 30upx;
+		justify-content: center;
+		text-align: center;
+	}
+	
+	.operation-view text{
+		margin-right: 20rpx;
+	}
+
+</style>

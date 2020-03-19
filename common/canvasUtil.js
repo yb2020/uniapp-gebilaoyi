@@ -1,18 +1,35 @@
-import base64src from '@/common/base64src'
-
 export default {
 	device: {
 		getSystemInfo() {
 			return new Promise((resolve, reject) => {
 				uni.getSystemInfo({
 					success: e => {
-						//返回文件路径
+						//返回屏幕大小
 						resolve({width: e.windowWidth, height: e.windowHeight})
 					},
 					fail: e => {
 						reject(new Error(e))
 					}
 				})
+			})
+		}
+	},
+	canvas: {
+		getCanvasPath(canvasId) {
+			return new Promise(async (resolve, reject) => {
+				
+				setTimeout(() => {
+					uni.canvasToTempFilePath({
+						canvasId: canvasId,
+						success: (res) => {
+							//返回canvas图片文件路径
+							resolve(res.tempFilePath)
+						},
+						fail: e => {
+							reject(new Error(e.mesage))
+						}
+					})
+				}, 200)
 			})
 		}
 	},
@@ -103,7 +120,7 @@ export default {
 			ctx.clip();//画了圆 再剪切 原始画布中剪切任意形状和尺寸。一旦剪切了某个区域，则所有之后的绘图都会被限制在被剪切的区域内
 			//ctx.drawImage(img, x, y, w, h) // 推进去图片
 			var localImage = await exports.default.image.getImageInfo(img)
-			ctx.drawImage(localImage, x, y, w, h) // 推进去图片
+			ctx.drawImage(localImage.path, x, y, w, h) // 推进去图片
 			ctx.restore()
 		},
 	},
@@ -115,7 +132,7 @@ export default {
 			  src: url,
 			  success(res) {
 				if (res.errMsg === 'getImageInfo:ok') {
-					resolve(res.path)
+					resolve(res)
 				} else {
 					reject(new Error('getImageInfo fail'))
 				}
