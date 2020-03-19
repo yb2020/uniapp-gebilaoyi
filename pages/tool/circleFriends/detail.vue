@@ -2,10 +2,11 @@
 	<view class="uni-container">
 		<view class="view userinfo-avatar-wapper">
 			<image class="userinfo-avatar" :src="data.createUser.avatarUrl"></image>
-		</view>
-		<view class="view">
 			<text class="media-title" :class="{'media-title2': true}">{{data.createUser.nickName}}</text>
 		</view>
+	
+			
+		
 		
 		<view class="uni-textarea">
 			{{data.content}}
@@ -229,19 +230,18 @@
 	}
 	
 	.media-title2 {
-		flex: 1;
-		margin-top: 6upx;
-		line-height: 40upx;
+		padding-left: 10upx;
 	}
 	
 	.userinfo-avatar-wapper{
-		width: 128upx;
+		display: flex;
+		align-items: center;
 		height: 128upx;
-		
+		margin-bottom: 20upx;
 		.userinfo-avatar {
 			border-radius: 128upx;
-			width: 100%;
-			height: 100%;
+			width: 128upx;
+			height: 128upx;
 			border: 4upx solid #F0F0F0 ;
 		}
 	}

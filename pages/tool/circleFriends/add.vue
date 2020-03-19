@@ -15,9 +15,10 @@
 					<view class="uni-uploader-body">
 						<view class="uni-uploader__files">
 							<block v-for="(image,index) in imageList" :key="index">
-								<text v-if="deleteImgButtonShow" class="uni-badge-red" style="position: absolute; top: 0;right: 0;" @tap="deleteImage(index)">删除</text>
+								
 								<view class="uni-uploader__file">
 									<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage" @longpress="prepareDeleteImage()"></image>
+									<text v-if="deleteImgButtonShow" class="uni-badge-red" style="position: absolute; top: 0;right: 0;" @tap="deleteImage(index)">删除</text>
 								</view>
 							</block>
 							<view class="uni-uploader__input-box" v-if="imageList.length < 9">

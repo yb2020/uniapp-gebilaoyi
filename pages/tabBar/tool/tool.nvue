@@ -291,11 +291,12 @@
 	}
 	
 	.uni-userinfo {
-		position: fixed;
+		position: absolute;
+		
 		top: 380upx;
 		display: inline-block;
 		right: 0;
-		width: 300upx;
+	
 		padding-right: 30upx;
 		.userinfo-name {
 			line-height: 128upx;

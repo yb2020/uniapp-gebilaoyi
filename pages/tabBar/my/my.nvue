@@ -114,7 +114,7 @@
 		}
 	}
 	.user-title {
-		line-height: 128upx;
+		
 		font-size: 30upx;
 		padding-left: 20upx;
 		color: #FFFFFF;

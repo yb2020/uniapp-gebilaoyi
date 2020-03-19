@@ -660,6 +660,7 @@ radio-group label, checkbox-group label{
 	margin: 10upx;
 	width: 210upx;
 	height: 210upx;
+	position: relative;
 }
 .uni-uploader__img {
 	display: block;
