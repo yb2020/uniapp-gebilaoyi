@@ -6,15 +6,10 @@
 		
 		<view class="uni-margin-wrap">
 			<swiper class="swiper" circular :indicator-dots="indicatorDots" :autoplay="autoplay" :interval="interval" :duration="duration">
-				<swiper-item>
-					<view class="swiper-item uni-bg-red">A</view>
+				<swiper-item @click="ad(item)" v-for="(item,index) in swiperList" :key="index">
+					<image :src="item.url" mode="aspectFill" v-if="item.type=='image'"></image>
 				</swiper-item>
-				<swiper-item>
-					<view class="swiper-item uni-bg-green">B</view>
-				</swiper-item>
-				<swiper-item>
-					<view class="swiper-item uni-bg-blue">C</view>
-				</swiper-item>
+				
 			</swiper>
 		</view>
 		
@@ -52,6 +47,7 @@
 <script>
 	import Authorization from "@/common/Authorization"
 	import laoyiApi from "@/api/laoyi"
+	import ACLApi from '@/common/ACL'
 	import Login from "@/pages/components/login"
 	import Item from '@/pages/components/circleFriends/item'
 	import { formatTime, parseTime } from '@/utils'
@@ -67,6 +63,15 @@
         },
         data() {
             return {
+				swiperList: [{
+					id: 0,
+					type: 'image',
+					url: 'https://mmbiz.qpic.cn/mmbiz_png/kaI5jJfvU3KOtibaayPeRevJTPmjhsYec8anxfWuMF0mKwUOKRaqfhv3JwjFic62kMMvFGe6ag7kvV3sRdZZVCEQ/0?wx_fmt=png'
+				}, {
+					id: 1,
+					type: 'image',
+					url: 'https://mmbiz.qpic.cn/mmbiz_png/kaI5jJfvU3KOtibaayPeRevJTPmjhsYechKltTibmOzpRNQ89oZTptWtqCl03VDGSVmMibib6HQYUxUxPrNNPeySRw/0?wx_fmt=png',
+				}],
 				userInfo: this.$store.state,
 				page: {
 					refreshing: false,
@@ -110,23 +115,64 @@
                 url: '/pages/about/about'
             });
         },
-        onLoad() {
+        async onLoad(options) {
+			if(options.scene) {
+				let {paramters} = await ACLApi.qr.app.getByIdName(options.scene)
+				let isPorxy =  ACLApi.qr.app.utils.get(paramters, "proxy")
+				let proxyType =  ACLApi.qr.app.utils.get(paramters, "proxyType")
+				
+				if("true" !== isPorxy) {
+					uni.switchTab({
+						url: '/pages/tabBar/component/component'
+					})
+					return
+				}
+				switch(proxyType) {
+					case 'ImageText' :
+						let id = ACLApi.qr.app.utils.get(paramters, "id")
+						console.log(id)
+						uni.navigateTo({//跳转到图文详情页
+							url: '/pages/tool/circleFriends/detail?id=' + id,
+							success: (e) => {
+								console.log(e)
+							},
+							fail: (e) => {
+								console.log(e)
+							}
+						})
+						break;
+					default:
+						uni.switchTab({
+							url: '/pages/tabBar/component/component',
+							success: (e) => {
+								console.log(e)
+							},
+							fail: (e) => {
+								console.log(e)
+							}
+						})
+						break;
+				}
+			}
         },
         onShow() {
-			//console.log("onShow1111")
+			//console.log(this.$store.state.tool.refresh)
             this.navigateFlag = false
             this.leaveSetTabBarPage()
 			
-			
 			if(Authorization.checkLogin()) {
+				if(this.$store.state.tool.refresh) {
+					this.initList()
+					this.getList()
+					this.$store.dispatch('toggleRefreshTool')
+					return 
+				}
 				if(this.page.currentPage === 1) {
 					this.getList()
 				}
-				
 			}else {
 				this.initList()
 			}
-
         },
         onHide() {
             this.leaveSetTabBarPage();
@@ -185,6 +231,30 @@
                     url: path
                 });
             },
+			ad(item) {
+				uni.downloadFile({
+					url: item.url,//图片地址
+					success: (res) =>{
+						if (res.statusCode === 200){
+							uni.saveImageToPhotosAlbum({
+								filePath: res.tempFilePath,
+								success: function() {
+									uni.showToast({
+										title: "保存成功,请扫描二维码关注",
+										icon: "none"
+									});
+								},
+								fail: function() {
+									uni.showToast({
+										title: "保存失败",
+										icon: "none"
+									});
+								}
+							});
+						} 
+					}
+				})
+			},
             leaveSetTabBarPage() {
                 setTimeout(() => {
                     this.navigateFlag = false;
@@ -213,7 +283,11 @@
 						this.page.currentPage = tmpPage.pageNum
 						this.page.pageSize = tmpPage.pageSize
 						this.page.pages = tmpPage.pages
-						this.page.list = this.page.list.concat(JSON.parse(JSON.stringify(tmpPage.list))) // 断开引用
+						if(this.page.currentPage === 1) {
+							this.page.list = JSON.parse(JSON.stringify(tmpPage.list)) // 断开引用
+						}else {
+							this.page.list = this.page.list.concat(JSON.parse(JSON.stringify(tmpPage.list))) // 断开引用
+						}
 						
 						this.page.loadingText = '上拉加载更多数据。。。'
 						this.page.isLoading = false

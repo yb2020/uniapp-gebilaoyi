@@ -28,9 +28,20 @@ const store = new Vuex.Store({
 		isAgent: false,
 		agent: '',
 		expiresAt: 0,
-		level: -1
+		level: -1,
+		tool: {
+			refresh: false
+		}
+	},
+	actions: {
+		toggleRefreshTool({ commit }) {
+			commit("TOGGLE_REFRESH_TOOL")
+		}
 	},
 	mutations: {
+		TOGGLE_REFRESH_TOOL(state) {
+			state.tool.refresh = !state.tool.refresh
+		},
 		init(state, initParams) {
 			state.orgId = initParams.orgId
 			state.appName = initParams.appName
@@ -117,35 +128,6 @@ const store = new Vuex.Store({
         currentColor(state){
             return state.colorList[state.colorIndex]
         }
-    },
-	actions: {
-		// lazy loading openid
-		getUserOpenId: async function ({
-			commit,
-			state
-		}) {
-			return await new Promise((resolve, reject) => {
-				if (state.openId) {
-					resolve(state.openId)
-				} else {
-					uni.login({
-						success: (data) => {
-							commit('login')
-							setTimeout(function () { //模拟异步请求服务器获取 openId
-								const openId = '123456789'
-								console.log('uni.request mock openid[' + openId + ']');
-								commit('setOpenid', openId)
-								resolve(openId)
-							}, 1000)
-						},
-						fail: (err) => {
-							console.log('uni.login 接口调用失败，将无法正常使用开放接口等服务', err)
-							reject(err)
-						}
-					})
-				}
-			})
-		}
 	}
 })
 

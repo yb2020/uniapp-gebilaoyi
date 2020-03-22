@@ -4,8 +4,6 @@
 			<image class="userinfo-avatar" :src="data.createUser.avatarUrl"></image>
 			<text class="media-title" :class="{'media-title2': true}">{{data.createUser.nickName}}</text>
 		</view>
-	
-			
 		
 		
 		<view class="uni-textarea">
@@ -15,10 +13,10 @@
 		<view class="uni-common-mt">
 			<view class="uni-uploader-body">
 				<view class="uni-uploader__files">
-					<block v-for="(image,index) in data.imagesBase64Array" :key="index">
+					<block v-for="(image,index) in data.imagesThumbnailBase64Array" :key="index">
 						<text v-if="deleteImgButtonShow" class="uni-badge-red" style="position: absolute; top: 0;right: 0;" @tap="deleteImage(index)">删除</text>
 						<view class="uni-uploader__file">
-							<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+							<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage(data.id, index)"></image>
 						</view>
 					</block>
 				</view>
@@ -30,6 +28,8 @@
 			<button v-if="data.creator !== user.username" :loading="isLoading" :disabled="isLoading" @tap="onePressRelay" type="primary">一键转发</button>
 			<button type="default" @tap="toBack">返回</button>
 		</view>
+		
+		<publicAccount />
 		
 		<!-- 用于一键保存并生成带有二维码的图片，不可删除 -->
 		<view style="position:fixed;top:999999999999999999999rpx;">
@@ -45,12 +45,14 @@
 	import ACLApi from '@/common/ACL'
 	import canvasUtil from '@/common/canvasUtil'
 	import {createUniqueString} from '@/utils'
+	import publicAccount from "@/pages/components/publicAccount"
 	import toolUtils from '@/pages/components/circleFriends/utils'
 	
 	var util = require('@/common/util.js');
 	
 	export default {
 		components: {
+			publicAccount
 		},
 		async onLoad(scene) {
 			this.id = scene.id
@@ -62,6 +64,7 @@
 				id: '',
 				user: this.$store.state,
 				data: {},
+				originImageArray: [],
 				isLoading: false,
 				isSaveLoading: false,
 				canvasHeight: 0,
@@ -70,6 +73,7 @@
 		},
 		methods: {
 			toBack() {
+				this.$store.dispatch('toggleRefreshTool')
 				uni.switchTab({//跳转到图文详情页
 					url: '/pages/tabBar/tool/tool',
 					success: (e) => {
@@ -80,22 +84,45 @@
 					}
 				})
 			},
-			previewImage(e) {
-				var current = e.target.dataset.src
-				console.log(e.target)
+			downLoadOriginImage(id) {
+				let _this = this
+				return new Promise((resolve, reject) => {
+					if(!_this.originImageArray || _this.originImageArray.length === 0) {
+						laoyiApi.personal.imageText.downLoadOriginImage({id: id}).then(result => {
+							_this.originImageArray = result.data
+							resolve(_this.originImageArray)
+						}).catch(e => {
+							reject(e.getMessage)
+						})
+					}else {
+						resolve(_this.originImageArray)
+					}
+					
+				})
+			},
+			async previewImage(id, index) {
+				//var current = e.target.dataset.src;
+				uni.showLoading({
+					title: '正在下载原图'
+				})
+				let imagesBase64Array = await this.downLoadOriginImage(id)
+				
 				uni.previewImage({
-					current: current,
-					urls: this.data.imagesBase64Array,
+					current: imagesBase64Array[index],
+					urls: imagesBase64Array,
+					success() {
+						uni.hideLoading()
+					},
 					longPressActions: {
 						itemList: ['发送给朋友', '保存图片', '收藏'],
 						success: function(data) {
-							console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
+							//console.log('选中了第' + (data.tapIndex + 1) + '个按钮,第' + (data.index + 1) + '张图片');
 						},
 						fail: function(err) {
 							console.log(err.errMsg);
 						}
 					}
-				})
+				});
 			},
 			copyText(content) {
 				uni.setClipboardData({
@@ -110,6 +137,7 @@
 				});
 			},
 			onePressRelay() {
+				let _this = this
 				let row = this.data
 				this.isLoading = true
 				uni.showLoading({
@@ -121,7 +149,11 @@
 						title: result.message,
 						duration: 2000,
 						success() {
-							console.log("跳转到自己的界面")
+							//跳转到自己的列表
+							_this.$store.dispatch('toggleRefreshTool')
+							uni.switchTab({
+								url: '/pages/tabBar/tool/tool'
+							})
 						}
 					})
 					
@@ -143,17 +175,23 @@
 				let _this = this
 				let row = this.data
 				//this.isSaveLoading = true
+				
+				uni.showLoading({
+					title: '正下载原图并合成海报'
+				})
+				let imagesBase64Array = await this.downLoadOriginImage(row.id)
+				
 				_this.copyText(row.content)
 				
 				let j = 0 //计算成功保存的张数
-				let size = row.imagesBase64Array.length
+				let size = imagesBase64Array.length
 				//获取二维码
 				let qrCodeObject = await laoyiApi.personal.imageText.getImageTextQrCode({id: row.id})
 				const fsm = uni.getFileSystemManager()
 				
 				for(var i = 0 ; i < size ; i ++) {
 					//图片
-					let path = await base64src(row.imagesBase64Array[i], createUniqueString())
+					let path = await base64src(imagesBase64Array[i], createUniqueString())
 					if (i === 0) {
 						//获取图片大小
 						let imageInfo = await canvasUtil.image.getImageInfo(path);

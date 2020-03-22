@@ -35,18 +35,22 @@
 				</uni-list>
 			</view> -->
 			
+			
 			<view class="uni-btn-v">
 				<button :loading="isLoading" :disabled="isLoading" form-type="submit" type="primary">{{submitBtnText}}</button>
 				<button type="default" form-type="reset">重置</button>
 			</view>
+			
+			<publicAccount />
+			
 		</form>
-
 
 	</view>
 </template>
 
 <script>
 	import laoyiApi from "@/api/laoyi"
+	import publicAccount from "@/pages/components/publicAccount"
 	
 	var graceChecker = require("@/common/graceChecker.js");
 	var util = require('@/common/util.js');
@@ -55,6 +59,7 @@
 	
 	export default {
 		components: {
+			publicAccount
 		},
 		data() {
 			return {

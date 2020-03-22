@@ -1,0 +1,10 @@
+<template>
+	<view style="width:100%;height:168rpx;position:relative;">
+	  <official-account style="position:absolute;top:0;width:100%;height:168rpx;"></official-account>
+	</view>
+</template>
+
+<script>
+</script>
+<style lang="scss" scoped>
+</style>

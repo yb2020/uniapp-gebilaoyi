@@ -19,8 +19,8 @@
 			</view>
 			<view class="uni-uploader-body">
 				<view class="uni-uploader__files">
-					<block v-for="(image, index) of row.imagesBase64Array" :key="index">
-						<view class="uni-uploader__file"><image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image></view>
+					<block v-for="(image, index) of row.imagesThumbnailBase64Array" :key="index">
+						<view class="uni-uploader__file"><image class="uni-uploader__img" :src="image" @tap="previewImage(row.id, index)"></image></view>
 					</block>
 				</view>
 			</view>
@@ -66,6 +66,11 @@ export default {
 			default: ''
 		}
 	},
+	data() {
+	    return {
+			originImageArray: []
+		}
+	},
 	methods: {
 		toDetail() {
 			uni.navigateTo({
@@ -84,7 +89,9 @@ export default {
 				}
 			});
 		},
+		
 		onePressRelay(row) {
+			let _this = this
 			uni.showLoading({
 				title: '转发中...'
 			});
@@ -94,7 +101,11 @@ export default {
 					title: result.message,
 					duration: 2000,
 					success() {
-						console.log('跳转到自己的界面');
+						//跳转到自己的列表,并告诉主页面需要刷新
+						_this.$store.dispatch('toggleRefreshTool')
+						uni.switchTab({
+							url: '/pages/tabBar/tool/tool'
+						})
 					}
 				});
 			});
@@ -111,18 +122,24 @@ export default {
 		},
 		async onePressSave(row) {
 			let _this = this;
+			
+			uni.showLoading({
+				title: '正下载原图并合成海报'
+			})
+			let imagesBase64Array = await this.downLoadOriginImage(row.id)
+			
 			_this.copyText(row.content);
 
 			let j = 0; //计算成功保存的张数
-			let size = row.imagesBase64Array.length;
+			let size = imagesBase64Array.length;
 			//获取二维码
 			let qrCodeObject = await laoyiApi.personal.imageText.getImageTextQrCode({ id: row.id });
 			const fsm = uni.getFileSystemManager();
 
 			for (var i = 0; i < size; i++) {
 				//图片
-				let path = await base64src(row.imagesBase64Array[i], createUniqueString());
-
+				let path = await base64src(imagesBase64Array[i], createUniqueString());
+				
 				if (i === 0) {
 					//获取图片大小
 					let imageInfo = await canvasUtil.image.getImageInfo(path);
@@ -179,11 +196,35 @@ export default {
 				});
 			});
 		},
-		previewImage(e) {
-			var current = e.target.dataset.src;
+		downLoadOriginImage(id) {
+			let _this = this
+			return new Promise((resolve, reject) => {
+				if(!_this.originImageArray || _this.originImageArray.length === 0) {
+					laoyiApi.personal.imageText.downLoadOriginImage({id: id}).then(result => {
+						_this.originImageArray = result.data
+						resolve(_this.originImageArray)
+					}).catch(e => {
+						reject(e.getMessage)
+					})
+				}else {
+					resolve(_this.originImageArray)
+				}
+				
+			})
+		},
+		async previewImage(id, index) {
+			//var current = e.target.dataset.src;
+			uni.showLoading({
+				title: '正在下载原图'
+			})
+			let imagesBase64Array = await this.downLoadOriginImage(id)
+			
 			uni.previewImage({
-				current: current,
-				urls: this.row.imagesBase64Array,
+				current: imagesBase64Array[index],
+				urls: imagesBase64Array,
+				success() {
+					uni.hideLoading()
+				},
 				longPressActions: {
 					itemList: ['发送给朋友', '保存图片', '收藏'],
 					success: function(data) {

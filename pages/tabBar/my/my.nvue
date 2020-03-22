@@ -15,6 +15,18 @@
 			</view>
 		</view>
 		
+		<view class="service-body">
+			<uni-grid :column="3" :show-border="false" :highlight="true" @change="change">
+				<uni-grid-item v-for="(item, index) in serviceList" :index="index" :key="index">
+					<view class="grid-item-box">
+						<uni-icons v-if="item.name" class="icons" :type="item.name" :color="item.color" size="40" />
+						<image v-else :src="item.imageUrl" class="image" mode="aspectFill" />
+						<text class="text">{{ item.text }}</text>
+					</view>
+				</uni-grid-item>
+			</uni-grid>
+		</view>
+		
 		<view class="uni-common-mt">
 			<uni-list>
 				<uni-list-item title="意见反馈" @tap="chooseLocation" :show-extra-icon="true" :extra-icon="{color: '#4cd964',size: '22',type: 'location'}" />
@@ -53,6 +65,24 @@
 		},
 		data() {
 			return {
+				serviceList: [{
+					imageUrl: '/static/c1.png',
+					url: '/pages/my/share',
+					name: 'pengyouquan',
+					color: '#007aff',
+					text: '分享好友',
+					badge: '0',
+					type: "primary"
+				},
+				{
+					imageUrl: '/static/c2.png',
+					url: '',
+					name: 'image',
+					color: '#00b200',
+					text: '疫情海报',
+					badge: '1',
+					type: "success"
+				}],
 				userInfo: this.$store.state,
 				isHiddenTabBar: true
 			};
@@ -64,6 +94,17 @@
 			...mapMutations({
 				logout: 'logout'
 			}),
+			change(e) {
+				let { index } = e.detail
+				let _this = this
+				
+				let item = this.serviceList[index]
+				
+				uni.navigateTo({
+					url: item.url
+				})
+				
+			},
 			toLogin() {
 				if(!Authorization.checkLogin()) {
 					this.toggleHideTabBar()
@@ -96,7 +137,7 @@
 .user {
 	background: #FF5000;
 	overflow: hidden;
-	height: 450upx;
+	height: 350upx;
 	padding: 20upx;
 	box-sizing: border-box;
 	flex-direction: row;
@@ -121,65 +162,37 @@
 		float: left ;
 	}
 }
-.list-bottom {
-	box-shadow: 0 0 22rpx rgba(0, 0, 0, 0.18);
-	margin-top: 50rpx;
-	border-radius: 10rpx;
-	.line {
-		padding: 30rpx;
-		justify-content: space-between;
-		align-items: center;
-
-		box-sizing: border-box;
-		.name {
-		}
-		&:not(:first-child) {
-			border-top: 2rpx solid rgba(0, 0, 0, 0.18);
-		}
-	}
+.service-body {
+	flex-direction: column;
+	padding: 15px;
+	background-color: #FFFFFF;
 }
-.my-user {
-	.img {
-		width: 100rpx;
-		height: 100rpx;
-		border-radius: 50%;
-	}
-	.user-name {
-		font-size: 40rpx;
-		color: #f1f1f1;
-	}
-}
-.list-center {
-	box-shadow: 0 0 22rpx rgba(0, 0, 0, 0.18);
-	border-radius: 10rpx;
-	flex-wrap: wrap;
-
-	align-items: center;
-	text-align: center;
-	margin-top: 40rpx;
-	box-sizing: border-box;
-
-	.line {
-		box-sizing: border-box;
-		padding-top: 30rpx;
-		padding-bottom: 30rpx;
-		.img {
-			width: 100rpx;
-			height: 100rpx;
-			box-sizing: border-box;
-			display: block;
-			margin: 0 auto;
-		}
-	}
-}
-.gird {
-	width: 33.3%;
-}
-.m-rl-20 {
-	margin-left: 20rpx;
-	margin-right: 20rpx;
-}
-.d-felx {
+.grid-item-box {
+	flex: 1;
+	/* position: relative;*/
+	/* #ifndef APP-NVUE */
 	display: flex;
+	/* #endif */
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 15px 0;
+}
+.icons {
+	height: 120rpx;
+}
+.image {
+	width: 120rpx;
+	height: 120rpx;
+}
+
+.text {
+	font-size: 26rpx;
+	align-items: center;
+}
+.grid-dot {
+	position: absolute;
+	top: 5px;
+	right: 15px;
 }
 </style>

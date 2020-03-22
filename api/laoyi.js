@@ -23,6 +23,14 @@ export default {
 					data: params
 				})
 			},
+			downLoadOriginImage(params) {
+				return serviceAPI.request({
+					url: serviceId + '/personal/imageText/downLoadOriginImage',
+					business: null,
+					method: 'POST',
+					data: params
+				})
+			},
 			getDetailById(params) {
 				return serviceAPI.request({
 					url: serviceId + '/personal/imageText/getDetailById',
