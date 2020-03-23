@@ -115,22 +115,14 @@
                 url: '/pages/about/about'
             });
         },
-        async onLoad(options) {
-			if(options.scene) {
-				let {paramters} = await ACLApi.qr.app.getByIdName(options.scene)
-				let isPorxy =  ACLApi.qr.app.utils.get(paramters, "proxy")
+        onLoad() {
+			if(this.$store.state.tool.sceneParamters) {
+				let paramters = this.$store.state.tool.sceneParamters
 				let proxyType =  ACLApi.qr.app.utils.get(paramters, "proxyType")
 				
-				if("true" !== isPorxy) {
-					uni.switchTab({
-						url: '/pages/tabBar/component/component'
-					})
-					return
-				}
 				switch(proxyType) {
 					case 'ImageText' :
 						let id = ACLApi.qr.app.utils.get(paramters, "id")
-						console.log(id)
 						uni.navigateTo({//跳转到图文详情页
 							url: '/pages/tool/circleFriends/detail?id=' + id,
 							success: (e) => {
@@ -374,6 +366,7 @@
 		top: 380upx;
 		display: inline-block;
 		right: 0;
+		z-index: 100;
 	
 		padding-right: 30upx;
 		.userinfo-name {

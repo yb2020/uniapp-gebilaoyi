@@ -30,17 +30,24 @@ const store = new Vuex.Store({
 		expiresAt: 0,
 		level: -1,
 		tool: {
+			sceneParamters: {},
 			refresh: false
 		}
 	},
 	actions: {
 		toggleRefreshTool({ commit }) {
 			commit("TOGGLE_REFRESH_TOOL")
+		},
+		toolInit({ commit }, sceneParamters) {
+			commit("TOOL_INIT", sceneParamters)
 		}
 	},
 	mutations: {
 		TOGGLE_REFRESH_TOOL(state) {
 			state.tool.refresh = !state.tool.refresh
+		},
+		TOOL_INIT(state, sceneParamters) {
+			state.tool.sceneParamters = sceneParamters
 		},
 		init(state, initParams) {
 			state.orgId = initParams.orgId

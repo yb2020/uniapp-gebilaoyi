@@ -33,10 +33,27 @@
     // #endif
 
     import uLink from '@/components/uLink.vue'
+	import ACLApi from '@/common/ACL'
+	
     export default {
         components: {
             uLink
         },
+		async onLoad(options) {
+			if(options.scene) {
+				let {paramters} = await ACLApi.qr.app.getByIdName(options.scene)
+				let isPorxy =  ACLApi.qr.app.utils.get(paramters, "proxy")
+				let proxyType =  ACLApi.qr.app.utils.get(paramters, "proxyType")
+				
+				if("true" === isPorxy && 'ImageText' === proxyType) {
+					this.$store.dispatch("toolInit", paramters)
+					uni.switchTab({
+						url: '/pages/tabBar/tool/tool'
+					})
+					return
+				}
+			}
+		},
         data() {
             return {
                 list: [{

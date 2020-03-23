@@ -88,9 +88,7 @@
 				];
 				//进行表单检查
 				var checkRes = graceChecker.check(formData, rule);
-				if(checkRes){
-				    uni.showToast({title:"验证通过!", icon:"none"});
-				}else{
+				if(!checkRes){
 					this.submitBtnText = '保存图文'
 					this.isLoading = false
 				    uni.showToast({ title: graceChecker.error, icon: "none" });

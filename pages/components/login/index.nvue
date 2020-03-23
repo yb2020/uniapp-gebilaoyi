@@ -9,15 +9,14 @@
 					</view>
 					<view class="uni-login-content-text">{{userInfo.nickName === '点击登录' ? '未登录' : userInfo.nickName}}</view>
 				</view>
-				<view class="uni-padding-wrapper uni-common-mt uni-common-mb">
+				<view class="uni-common-mb">
 					<!-- #ifdef APP-PLUS || MP-ALIPAY || MP-TOUTIAO -->
 					<button class="uni-padding-wrapper" @click="getUserInfo">{{title}}</button>
 					<!-- #endif -->
 					<!-- #ifdef MP-WEIXIN || MP-BAIDU || MP-QQ -->
 					<button class="uni-padding-wrapper" type="primary" open-type="getUserInfo" @getuserinfo="mpGetUserInfo">{{title}}</button>
 					<!-- #endif -->
-					
-					<text class="uni-login-cancel-btn" @click="cancel">取消登录</text>
+					<button class="uni-padding-wrapper uni-common-mt" type="default" open-type="getUserInfo" @tap="cancel">取消登录</button>
 				</view>
 			</view>
 		</uni-popup>
@@ -180,6 +179,7 @@
 		/* #endif */
 		justify-content: center;
 		align-items: center;
+		flex-direction: column;
 		
 		.uni-login-avatar-wapper {
 			width: 128upx;
@@ -193,12 +193,19 @@
 				border: 4upx solid #F0F0F0 ;
 			}
 		}
+		
+		.uni-login-content-text {
+			font-size: 26rpx;
+			color: #333;
+			align-items: center;
+			padding-top: 5px;
+			padding-bottom: 10px;
+		}
 	}
 	.uni-padding-wrapper {
-		width: 100%;
-		padding: 0 30upx;
+		width: 95%;
+		//padding: 0 30upx;
 	}
-	
 	
 
 	.uni-login-content-box {
@@ -227,13 +234,6 @@
 		height: 60rpx;
 	}
 
-	.uni-login-content-text {
-		font-size: 26rpx;
-		color: #333;
-		align-items: center;
-		padding-top: 5px;
-		padding-bottom: 10px;
-	}
 
 	.uni-login-cancel-btn {
 		height: 90rpx;

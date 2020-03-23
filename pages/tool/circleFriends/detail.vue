@@ -23,9 +23,14 @@
 			</view>
 		</view>
 		
-		<view class="uni-btn-v">
+		<view class="uni-btn-v" v-if="user.isLogin">
 			<button v-if="data.creator === user.username" class="uni-bg-blue" :loading="isSaveLoading" :disabled="isSaveLoading" @tap="onePressSave">一键保存</button>
 			<button v-if="data.creator !== user.username" :loading="isLoading" :disabled="isLoading" @tap="onePressRelay" type="primary">一键转发</button>
+			<button type="default" @tap="toBack">返回</button>
+		</view>
+		
+		<view class="uni-btn-v" v-else>
+			<button class="uni-bg-blue" @tap="toLogin">登录</button>
 			<button type="default" @tap="toBack">返回</button>
 		</view>
 		
@@ -35,6 +40,8 @@
 		<view style="position:fixed;top:999999999999999999999rpx;">
 			<canvas :style="{ width: '100vw', height: canvasHeight }" :canvas-id="canvasId" ></canvas>
 		</view>
+		
+		<Login ref="login" @close="closeLogin" @done="doneLogin"></Login>
 
 	</view>
 </template>
@@ -43,27 +50,33 @@
 	import laoyiApi from "@/api/laoyi"
 	import base64src from '@/common/base64src'
 	import ACLApi from '@/common/ACL'
+	import Login from "@/pages/components/login"
 	import canvasUtil from '@/common/canvasUtil'
 	import {createUniqueString} from '@/utils'
 	import publicAccount from "@/pages/components/publicAccount"
 	import toolUtils from '@/pages/components/circleFriends/utils'
+	import Authorization from "@/common/Authorization"
 	
 	var util = require('@/common/util.js');
 	
 	export default {
 		components: {
-			publicAccount
+			publicAccount,Login
 		},
-		async onLoad(scene) {
+		onLoad(scene) {
 			this.id = scene.id
-			var {data} = await laoyiApi.personal.imageText.getDetailById({id: this.id})
-			this.data = data
+			if(this.user.isLogin) {
+				this.initData()
+			}
+			
 		},
 		data() {
 			return {
 				id: '',
 				user: this.$store.state,
-				data: {},
+				data: {
+					content: '请登录后查看并转发'
+				},
 				originImageArray: [],
 				isLoading: false,
 				isSaveLoading: false,
@@ -72,6 +85,28 @@
 			};
 		},
 		methods: {
+			toLogin() {
+				if(!Authorization.checkLogin()) {
+					this.$refs["login"].open()
+					return false
+				}else {
+					this.init()
+					return true
+				}
+				
+			},
+			closeLogin() {
+				console.log("stop login")
+			},
+			async initData() {
+				var {data} = await laoyiApi.personal.imageText.getDetailById({id: this.id})
+				this.data = data	
+			},
+			doneLogin(bool) {
+				if(bool) {
+					this.initData()
+				}
+			},
 			toBack() {
 				this.$store.dispatch('toggleRefreshTool')
 				uni.switchTab({//跳转到图文详情页
