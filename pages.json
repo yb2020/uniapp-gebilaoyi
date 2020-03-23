@@ -2,7 +2,7 @@
 	"pages": [
 		// pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/tabBar/component/component",
+			"path": "pages/tabBar/home/home",
 			"style": {
 				//"navigationBarTitleText": "内置组件",
 				"app-plus": {
@@ -1186,7 +1186,7 @@
 		"borderStyle": "white",
 		"backgroundColor": "#F8F8F8",
 		"list": [{
-				"pagePath": "pages/tabBar/component/component",
+				"pagePath": "pages/tabBar/home/home",
 				"iconPath": "static/home.png",
 				"selectedIconPath": "static/homeHL.png",
 				"text": "首页"
@@ -1208,7 +1208,7 @@
 				"selectedIconPath": "static/eyeHL.png",
 				"text": "攻略"
 			}, {
-				"pagePath": "pages/tabBar/my/my",
+				"pagePath": "pages/tabBar/template/template",
 				"iconPath": "static/person.png",
 				"selectedIconPath": "static/personHL.png",
 				"text": "我的"
