@@ -13,6 +13,44 @@ export default {
 			})
 		}
 	},
+	union: {
+		jd: {
+			jingfen: {
+				getListByCategory(params) {
+					return serviceAPI.request({
+						url: serviceId + '/union/jd/jingfen/getListByCategory',
+						business: null,
+						method: 'POST',
+						data: params
+					})
+				},
+				getNav() {
+					return serviceAPI.request({
+						url: serviceId + '/union/jd/jingfen/getNav',
+						business: null,
+						method: 'POST'
+					})
+				},
+				getOtherNav() {
+					return serviceAPI.request({
+						url: serviceId + '/union/jd/jingfen/getOtherNav',
+						business: null,
+						method: 'POST'
+					})
+				}
+			},
+			goods: {
+				getGoodsQrCode(params) {
+					return serviceAPI.request({
+						url: serviceId + '/union/jd/goods/getGoodsQrCode',
+						business: null,
+						method: 'POST',
+						data: params
+					})
+				}
+			}
+		}
+	},
 	personal: {
 		imageText: {
 			getById(params) {

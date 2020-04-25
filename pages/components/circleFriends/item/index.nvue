@@ -124,7 +124,7 @@ export default {
 			let _this = this;
 			
 			uni.showLoading({
-				title: '正下载原图并合成海报'
+				title: '正在合成海报...'
 			})
 			let imagesBase64Array = await this.downLoadOriginImage(row.id)
 			
@@ -215,7 +215,7 @@ export default {
 		async previewImage(id, index) {
 			//var current = e.target.dataset.src;
 			uni.showLoading({
-				title: '正在下载原图'
+				title: '下载原图中...'
 			})
 			let imagesBase64Array = await this.downLoadOriginImage(id)
 			

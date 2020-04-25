@@ -125,7 +125,7 @@ export default {
 		},
 	},
 	image: {
-		getImageInfo (url) {
+		getImageInfo(url) {
 		  return new Promise((resolve, reject) => {
 			const objExp = new RegExp(/^http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/)
 			uni.getImageInfo({
@@ -140,10 +140,36 @@ export default {
 			})
 		  })
 		},
+		async saveImage(path) {
+			return new Promise((resolve, reject) => {
+				uni.saveImageToPhotosAlbum({
+					filePath: path,
+					success: res => {
+						resolve(true);
+					},
+					fail: e => {
+						resolve(false);
+					}
+				});
+			});
+		}
 	},
 	text: {
-		//文本换行 参数：1、canvas对象，2、文本 3、距离左侧的距离 4、距离顶部的距离 5、6、文本的宽度
-		drawText: function(ctx, str, leftWidth, initHeight, titleHeight, canvasWidth) {
+		/**
+		 * 文本换行 参数：1、canvas对象
+		 * 				2、文本 
+		 * 				3、距离左侧的距离 
+		 * 				4、距离顶部的距离 
+		 * 				5、文本高度
+		 * 				6、文本的宽度
+		 * @param {Object} ctx - canvas组件的绘图上下文
+		 * @param {String} str - 文字
+		 * @param {Number} leftWidth - 距离x坐标的距离
+		 * @param {Number} initHeight - 距离y坐标的距离
+		 * @param {Number} titleHeight - 文字高度
+		 * @param {Number} canvasWidth - 文字宽度
+		 */
+		drawText(ctx, str, leftWidth, initHeight, titleHeight, canvasWidth) {
 			var lineWidth = 0;
 			var lastSubStrIndex = 0; //每次开始截取的字符串的索引
 			for (let i = 0; i < str.length; i++) {

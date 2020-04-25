@@ -337,6 +337,16 @@
 		}
 	],
 	"subPackages": [{
+			"root": "pages/home",
+			"pages": [
+				{
+					"path": "goods/detail",
+					"style": {
+						"navigationBarTitleText": "商品详情"
+					}
+				}
+			]
+		},{
 			"root": "pages/tool",
 			"pages": [
 				{
@@ -1174,7 +1184,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "老易 • 优惠精选",
+		"navigationBarTitleText": "折上折 • 优惠精选",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#F8F8F8",
 		"backgroundColorTop": "#F4F5F6",
@@ -1189,7 +1199,7 @@
 				"pagePath": "pages/tabBar/home/home",
 				"iconPath": "static/home.png",
 				"selectedIconPath": "static/homeHL.png",
-				"text": "首页"
+				"text": "折上折" //首页
 			},
 			{
 				"pagePath": "pages/tabBar/tool/tool",
@@ -1208,7 +1218,7 @@
 				"selectedIconPath": "static/eyeHL.png",
 				"text": "攻略"
 			}, {
-				"pagePath": "pages/tabBar/template/template",
+				"pagePath": "pages/tabBar/my/my",
 				"iconPath": "static/person.png",
 				"selectedIconPath": "static/personHL.png",
 				"text": "我的"

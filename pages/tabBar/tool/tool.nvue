@@ -115,9 +115,10 @@
                 url: '/pages/about/about'
             });
         },
-        onLoad() {
-			if(this.$store.state.tool.sceneParamters) {
-				let paramters = this.$store.state.tool.sceneParamters
+        async onLoad(options) {
+			if(options.scene) {
+				let {paramters} = await ACLApi.qr.app.getByIdName(options.scene)
+				let isPorxy =  ACLApi.qr.app.utils.get(paramters, "proxy")
 				let proxyType =  ACLApi.qr.app.utils.get(paramters, "proxyType")
 				
 				switch(proxyType) {
@@ -134,15 +135,7 @@
 						})
 						break;
 					default:
-						uni.switchTab({
-							url: '/pages/tabBar/component/component',
-							success: (e) => {
-								console.log(e)
-							},
-							fail: (e) => {
-								console.log(e)
-							}
-						})
+						console.log("未获取的数据跳转")
 						break;
 				}
 			}
