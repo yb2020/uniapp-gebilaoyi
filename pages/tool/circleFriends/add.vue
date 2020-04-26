@@ -77,7 +77,7 @@
 		},
 		methods: {
 			async formSubmit(e) {
-				this.submitBtnText = '上传中...'
+				this.submitBtnText = '正在上传...'
 				this.isLoading = true
 				var formData = e.detail.value;
 				
@@ -109,28 +109,32 @@
 					}
 				}
 				
-				var result = await laoyiApi.personal.imageText.save(this.form)
+				laoyiApi.personal.imageText.save(this.form).then(result => {
+					if(result.status === 1) {
+						uni.showToast({
+							title: result.message,
+							duration: 3000,
+							complete() {
+								uni.navigateBack({
+									animationDuration: 1000
+								})
+							}
+						})
+					}else {
+						uni.showToast({
+							title: result.message,
+							duration: 3000,
+							complete() {
+								this.submitBtnText = '保存图文'
+								this.isLoading = false
+							}
+						})
+					}
+				}).catch(e => {
+					this.submitBtnText = '保存图文'
+					this.isLoading = false
+				})
 				
-				if(result.status === 1) {
-					uni.showToast({
-						title: result.message,
-						duration: 3000,
-						complete() {
-							uni.navigateBack({
-								animationDuration: 1000
-							})
-						}
-					})
-				}else {
-					uni.showToast({
-						title: result.message,
-						duration: 3000,
-						complete() {
-							this.submitBtnText = '保存图文'
-							this.isLoading = false
-						}
-					})
-				}
 				
 				
 			},

@@ -1206,12 +1206,12 @@
 				"iconPath": "static/tool.png",
 				"selectedIconPath": "static/toolHL.png",
 				"text": "传播工具"
-			}, 
-			{
-				"pagePath": "pages/tabBar/API/API",
-				"iconPath": "static/tool.png",
-				"selectedIconPath": "static/toolHL.png",
-				"text": "api"
+			// }, 
+			// {
+			// 	"pagePath": "pages/tabBar/API/API",
+			// 	"iconPath": "static/tool.png",
+			// 	"selectedIconPath": "static/toolHL.png",
+			// 	"text": "api"
 			}, {
 				"pagePath": "pages/tabBar/extUI/extUI",
 				"iconPath": "static/eye.png",

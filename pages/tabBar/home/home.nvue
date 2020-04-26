@@ -167,8 +167,8 @@
 					activeTab.currentPage += 1 
 				}
 				
-				//为第一页或者不需要获取数据
-				console.log(activeTab)
+				//为第一页且有数据的情况下，不需要获取数据
+				//console.log(activeTab)
 				if(activeTab.currentPage === currentPage) {
 					return false 
 				}
@@ -184,7 +184,7 @@
 				activeTab.currentPage = list.currpage
 				activeTab.totalPages = list.totalpages
 				this.scrolling = false
-				console.log(activeTab.data)
+				//console.log(activeTab.data)
             },
 			stopTouchMove() {
 				return true
@@ -319,9 +319,13 @@
 				return true
 			},
 			doneLogin() {
-				this.goDetail(this.clickCacheItem)
+				this.toggleHideTabBar()
+				setTimeout(() => {
+					this.goDetail(this.clickCacheItem)
+				}, 300)
 			},
 			closeLogin() {
+				
 				this.toggleHideTabBar()
 			},
         }

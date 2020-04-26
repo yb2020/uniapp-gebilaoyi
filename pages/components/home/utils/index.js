@@ -67,7 +67,8 @@ export default {
 				//画标题
 				ctx.setFillStyle('#333333'); // 文字颜色：黑色
 				ctx.setFontSize(14); // 文字字号：22px
-				canvasUtil.text.drawText(ctx, "          " + goods.skuName, 10, y + 10, 32, width - 10)
+				let skuName = goods.skuName && goods.skuName.length > 45 ? goods.skuName.substring(0, 45) + "..." : goods.skuName
+				canvasUtil.text.drawText(ctx, "            " + skuName, 10, y + 10, 32, width - 10)
 				//画京东label
 				ctx.save() // 先保存状态 已便于画完圆再用
 				ctx.beginPath() //开始绘制

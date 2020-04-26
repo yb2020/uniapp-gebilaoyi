@@ -4,37 +4,41 @@
 	<view class="media-item view" :style="{ flexDirection: 'column' }" hover-class="media-item-hover" @click="click">
 		<!-- <view class="view" :style="options.article_type === 2 ? 'flex-direction: row';" :class="{'media-image-right': options.article_type === 2, 'media-image-left': options.article_type === 1}"> -->
 		<!-- TODO 在支付宝小程序下 需要用 style 覆盖标签的默认样式 -->
-
-		<view class="view">
-			<view class="user">
-				<view class="view userinfo-avatar-wapper"><image class="userinfo-avatar" :src="user.avatarUrl"></image></view>
-				<view class="user-right">
-					<view class="view ">
-						<text class="media-title" :class="{ 'media-title2': true }">{{ user.nickName }}</text>
-					</view>
-					<view class="view" @click="toDetail">
-						<text class="media-title" :class="{ 'media-title2': true }">{{ row.content }}</text>
-					</view>
+		<view class="user">
+			<view class="view userinfo-avatar-wapper">
+				<image class="userinfo-avatar" :src="user.avatarUrl"></image>
+			</view>
+			<view class="user-right">
+				<view class="view" @tap="toDetail">
+					<text class="media-title">{{ user.nickName }}</text>
+				</view>
+				<view class="view" @tap="toDetail">
+					<text class="media-content" :style="{width: contentWidth + 'px'}">{{ row.content }}</text>
 				</view>
 			</view>
-			<view class="uni-uploader-body">
-				<view class="uni-uploader__files">
-					<block v-for="(image, index) of row.imagesThumbnailBase64Array" :key="index">
-						<view class="uni-uploader__file"><image class="uni-uploader__img" :src="image" @tap="previewImage(row.id, index)"></image></view>
-					</block>
-				</view>
+		</view>
+		
+		<view class="uni-uploader-body" style="display: block;" @tap="noThing">
+			<view class="uni-uploader__files">
+				<block v-for="(image, index) of row.imagesThumbnailBase64Array" :key="index">
+					<view class="uni-uploader__file"><image class="uni-uploader__img" :src="image" @tap="previewImage(row.id, index)"></image></view>
+				</block>
 			</view>
-			<view class="media-foot flex-row" style="flex-direction: row;">
-				<view class="media-info flex-row" style="flex-direction: row;">
-					<text class="info-text">{{ row.modifyDate }}</text>
-				</view>
-				<view class="operation-view">
-					<text @tap="copyText(row.content)">复制文字</text>
-					<text v-if="row.creator === user.username" @tap="onePressSave(row)">一键保存</text>
-					<text v-if="row.creator !== user.username" @tap="onePressRelay(row)">一键转发</text>
-				</view>
+		</view>
+		
+		
+		
+		
+		<view class="media-foot flex-row" style="flex-direction: row;">
+			<view class="media-info flex-row" style="flex-direction: row;">
+				<text class="info-text">{{ row.modifyDate }}</text>
 			</view>
-			<view class="media-item-line" style="position: absolute;"></view>
+			<view class="operation-view">
+				<text @tap="copyText(row.content)">复制文字</text>
+				<button v-if="row.creator === user.username" type="primary" size="mini" plain="true" @tap="onePressSave(row)">一键保存</button>
+				<button v-if="row.creator !== user.username" type="primary" size="mini" plain="true" @tap="onePressRelay(row)">一键转发</button>
+				
+			</view>
 		</view>
 	</view>
 </template>
@@ -68,10 +72,22 @@ export default {
 	},
 	data() {
 	    return {
-			originImageArray: []
+			originImageArray: [],
+			contentWidth: 300 
 		}
 	},
+	async onShow() {
+		let systemInfo = await canvasUtil.device.getSystemInfo();
+		this.contentWidth = systemInfo.width - 70
+	},
+	async onReady() {
+		let systemInfo = await canvasUtil.device.getSystemInfo();
+		this.contentWidth = systemInfo.width - 70
+	},
 	methods: {
+		noThing() {
+			
+		},
 		toDetail() {
 			uni.navigateTo({
 				url: '/pages/tool/circleFriends/detail?id=' + this.row.id
@@ -124,12 +140,10 @@ export default {
 			let _this = this;
 			
 			uni.showLoading({
-				title: '正在合成海报...'
+				title: '正在下载原图...'
 			})
 			let imagesBase64Array = await this.downLoadOriginImage(row.id)
 			
-			_this.copyText(row.content);
-
 			let j = 0; //计算成功保存的张数
 			let size = imagesBase64Array.length;
 			//获取二维码
@@ -141,6 +155,11 @@ export default {
 				let path = await base64src(imagesBase64Array[i], createUniqueString());
 				
 				if (i === 0) {
+					uni.hideLoading()
+					uni.showLoading({
+						title: '正在合在海报...'
+					})
+					
 					//获取图片大小
 					let imageInfo = await canvasUtil.image.getImageInfo(path);
 					let imageWidth = imageInfo.width;
@@ -160,8 +179,16 @@ export default {
 					});
 
 					path = await canvasUtil.canvas.getCanvasPath(canvasId);
+					
+					uni.hideLoading()
+					uni.showLoading({
+						title: '海报合成成功！'
+					})
 				}
-
+				
+				uni.showLoading({
+					title: `保存${i + 1}/${size}图片`
+				})
 				var isCompleted = await _this.saveImage(path);
 				if (isCompleted) {
 					j++;
@@ -172,11 +199,14 @@ export default {
 				}
 			}
 
+			_this.copyText(row.content);
 			if (j === size) {
+				uni.hideLoading()
 				uni.showToast({
-					title: '保存成功'
+					title: '已保存至相册'
 				});
 			} else {
+				uni.hideLoading()
 				uni.showToast({
 					icon: 'none',
 					title: '成功保存' + j + '张图片，' + (size - j) + '张保存失败！'
@@ -247,61 +277,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../../common/uni-nvue.css';
+	
+.media-item {
+	padding: 20upx ;
+}
 .user {
-	width: 100%;
-
-	position: relative;
-	height: 128upx;
-	.user-right {
-		position: absolute;
-		left: 148upx;
-		top:50%;
-		transform: translate(0,-50%);
-	}
+	flex-direction: row;
 	
 	.userinfo-avatar-wapper {
-		width: 128upx;
-		height: 128upx;
-		position: absolute;
-		top: 0;
+		width: 90upx;
+		height: 90upx;
 		.userinfo-avatar {
-			border-radius: 128upx;
+			border-radius: 50%;
 			width: 100%;
 			height: 100%;
-			border: 4upx solid #f0f0f0;
+			border: 4upx solid #dadada;
+		}
+	}
+	.user-right {
+		padding-left: 10upx ;
+		.media-title {
+			font-size: 16px ;
+			color: #777 ;
+		}
+		.media-content {
+			padding: 10upx;
 		}
 	}
 }
 
-.view {
-	flex-direction: column;
-}
-
-.flex-row {
-	flex-direction: row;
-}
-
-.flex-col {
-	flex-direction: column;
-}
-
-.list-cell {
-	width: 750upx;
-	padding: 0 30upx;
-}
-
 .uni-list-cell-hover {
 	background-color: #eeeeee;
-}
-
-.media-item {
-	position: relative;
-	flex: 1;
-	flex-direction: column;
-	/* border-bottom-width: 1upx;
-		border-bottom-style: solid;
-		border-bottom-color: #ebebeb; */
-	padding: 20upx 30upx 21upx 30upx;
 }
 
 .media-item-hover {
@@ -309,37 +316,11 @@ export default {
 }
 
 .media-item-line {
-	position: absolute;
 	left: 30upx;
 	right: 30upx;
 	bottom: 0;
 	height: 1upx;
 	background-color: #ebebeb;
-}
-
-.media-image-right {
-	flex-direction: row;
-}
-
-.media-image-left {
-	flex-direction: row-reverse;
-}
-
-.media-title {
-	flex: 1;
-}
-
-.media-title {
-	lines: 3;
-	text-overflow: ellipsis;
-	font-size: 30upx;
-	color: #555555;
-}
-
-.media-title2 {
-	flex: 1;
-	margin-top: 6upx;
-	line-height: 40upx;
 }
 
 .image-section {
@@ -393,23 +374,24 @@ export default {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
+	border-bottom: 1px solid #ccc ;
+	padding-bottom: 30upx ;
 }
 
 .operation-view {
 	position: relative;
 	align-items: center;
 	flex-direction: row;
-	width: 240upx;
-	height: 30upx;
+	width: 350upx;
+	height: 40upx;
 	font-size: 24upx;
 	color: #0574e3;
-	margin-right: 20rpx;
 	line-height: 30upx;
 	justify-content: center;
 	text-align: center;
 }
 
 .operation-view text {
-	margin-right: 20rpx;
+	margin-right: 40upx;
 }
 </style>

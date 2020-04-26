@@ -27,7 +27,7 @@
 			</view>
 		</view>
 		
-		<list class="scroll-v list" enableBackToTop="true" scroll-y loadmoreoffset="15" @loadmore="loadMore()">
+		<list class="item-list" enableBackToTop="true" scroll-y loadmoreoffset="15" @loadmore="loadMore()">
 			<cell v-for="(imageText,index) in page.list" :key="index">
 				<Item :row="imageText" :user="userInfo" :canvasId="canvasId" @changeCanvasHeight="changeCanvasHeight"></Item>
 			</cell>
@@ -326,11 +326,14 @@
 		width: 80rpx;
 		height: 80rpx;
 		top: 50rpx;
-		left: 0;
+		left: 10rpx;
 		z-index: 99;
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		background: #000 ;
+		border-radius: 10rpx;
+		opacity: .7;
 	}
 	
 	.swiper-list {
@@ -349,14 +352,13 @@
 	}
 	
 	.uni-padding-wrap {
-	    width:550rpx;
 	    padding:0 100rpx;
 	}
 	
 	.uni-userinfo {
 		position: absolute;
 		
-		top: 380upx;
+		top: 370upx;
 		display: inline-block;
 		right: 0;
 		z-index: 100;
@@ -382,6 +384,9 @@
 		}
 	}
 	
+	.item-list {
+		padding-top: 20upx ;
+	}
 	.update-tips-text {
 	    font-size: 14px;
 	    color: #ffffff;
