@@ -299,24 +299,48 @@
 						})
 						break 
 					case 1 :
-						let goodHref = encodeURIComponent("https://u.jd.com/kQOWls") //牛奶，测试成功
-						let customerinfo = "229643"
-						let path = ""
-						path = `/pages/proxy/union/union?spreadUrl=${goodHref}&customerinfo=${customerinfo}` //京东爆款详情页
-						path = `/pages/union/proxy/proxy?spreadUrl=${goodHref}&customerinfo=${customerinfo}` //京东购物详情页
-						console.log(path)
-						uni.navigateToMiniProgram({
-							appId: 'wx91d27dbf599dff74',
-							path: path ,
-							extraData: {
-							},
-							success(res) {
-								console.log(res)
-							},
-							fail(e) {
-								console.log(e)
-							}
+						uni.showLoading({
+							title: '生成购买链接...'
 						})
+						laoyiApi.union.jd.goods.getUnionHref({
+							materialId: this.goods.materialUrl,
+							couponUrl: this.goods.couponInfo.couponList[0].link || ""
+						}).then(result => {
+							if(result.status === 1) {
+								let unionGoodsHref = encodeURIComponent(result.data.unionGoodsHref) //牛奶"https://u.jd.com/kQOWls"，测试成功
+								let customerinfo = result.data.customerinfo  //3000446153必须传入网站ID
+								console.log(result)
+								
+								let path = ""
+								path = `/pages/proxy/union/union?spreadUrl=${unionGoodsHref}&customerinfo=${customerinfo}` //京东爆款详情页
+								path = `/pages/union/proxy/proxy?spreadUrl=${unionGoodsHref}&customerinfo=${customerinfo}` //京东购物详情页
+								
+								uni.navigateToMiniProgram({
+									appId: 'wx91d27dbf599dff74',
+									path: path ,
+									extraData: {
+									},
+									success(res) {
+										console.log(res)
+									},
+									fail(e) {
+										console.log(e)
+									}
+								})
+								setTimeout(() => {
+									uni.hideLoading()
+								}, 1000)
+								
+							}
+						}).catch(e => {
+							console.log(e)
+							uni.hideLoading()
+							uni.showToast({
+								icon: "none" ,
+								title: '获取京东推广链接失败!'
+							})
+						}) 
+						
 						break ;
 				}
 			},

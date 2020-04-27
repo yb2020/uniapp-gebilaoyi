@@ -47,6 +47,14 @@ export default {
 						method: 'POST',
 						data: params
 					})
+				},
+				getUnionHref(params) {
+					return serviceAPI.request({
+						url: serviceId + '/union/jd/goods/getUnionHref',
+						business: null,
+						method: 'POST',
+						data: params
+					})
 				}
 			}
 		}

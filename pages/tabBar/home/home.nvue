@@ -184,7 +184,7 @@
 				activeTab.currentPage = list.currpage
 				activeTab.totalPages = list.totalpages
 				this.scrolling = false
-				//console.log(activeTab.data)
+				console.log(activeTab.data)
             },
 			stopTouchMove() {
 				return true
