@@ -1,6 +1,6 @@
 import serviceAPI from '@/common/serviceAPI'
 
-const serviceId = '/MICROSERVICE-ACL'
+const serviceId = '/microService-acl'
 
 export default {
 	qr:{
@@ -8,6 +8,13 @@ export default {
 			getByIdName(idName) {
 			  return serviceAPI.request({
 				url: serviceId + '/qr/app/getByIdName/' + idName,
+				method: 'get',
+				data: null
+			  })
+			},
+			getById(id) {
+			  return serviceAPI.request({
+				url: serviceId + '/qr/app/getById/' + id,
 				method: 'get',
 				data: null
 			  })

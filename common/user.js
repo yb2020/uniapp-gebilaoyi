@@ -1,6 +1,6 @@
 import serviceAPI from '@/common/serviceAPI'
 
-const serviceId = '/MICROSERVICE-USER'
+const serviceId = '/microService-user'
 
 export default {
 	user: {

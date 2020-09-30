@@ -41,7 +41,13 @@
 			Authorization.getProvider()
 			
 			if(scene) { //只要有scene,优先重新获取
-				var {paramters} = await ACLApi.qr.app.getByIdName(scene)
+				let paramters = await ACLApi.qr.app.getByIdName(scene)
+				if(!paramters) {
+					paramters = await ACLApi.qr.app.getById(scene)
+				}
+				paramters = paramters.paramters
+				console.log(paramters)
+				
 				store.commit("init",{
 					orgId: ACLApi.qr.app.utils.get(paramters, "orgId") || "8041b3e636d54b8db78f49572ba414bf",
 					appName: ACLApi.qr.app.utils.get(paramters, "appId") || "yiblog",

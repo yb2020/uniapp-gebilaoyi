@@ -1,7 +1,7 @@
 
 import serviceAPI from '@/common/serviceAPI'
 
-const serviceId = '/MICROSERVICE-APP-BLOG'
+const serviceId = '/microService-app-blog'
 
 export default {
 	location: {

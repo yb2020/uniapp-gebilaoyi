@@ -48,6 +48,7 @@
 <script>
 	import Login from "@/pages/components/login"
 	import laoyiApi from "@/api/laoyi"
+	import ACLApi from '@/common/ACL'
 	import goodsItem from '@/pages/components/home/goods-item'
 	import Authorization from "@/common/Authorization"
 
@@ -131,7 +132,34 @@
                 refreshIcon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAB5QTFRFcHBw3Nzct7e39vb2ycnJioqK7e3tpqam29vb////D8oK7wAAAAp0Uk5T////////////ALLMLM8AAABxSURBVHja7JVBDoAgDASrjqj//7CJBi90iyYeOHTPMwmFZrHjYyyFYYUy1bwUZqtJIYVxhf1a6u0R7iUvWsCcrEtwJHp8MwMdvh2amHduiZD3rpWId9+BgPd7Cc2LIkPyqvlQvKxKBJ//Qwq/CacAAwDUv0a0YuKhzgAAAABJRU5ErkJggg=="
             }
         },
-        onLoad() {
+        async onLoad(options) {
+			if(options.scene) {
+				console.log(options.scene)
+				let {paramters} = await ACLApi.qr.app.getById(options.scene)
+				let isPorxy =  ACLApi.qr.app.utils.get(paramters, "proxy")
+				let proxyType =  ACLApi.qr.app.utils.get(paramters, "proxyType")
+				console.log(paramters)
+				
+				switch(proxyType) {
+					//JDGoodsImageType
+					case 'ImageText' :
+						let id = ACLApi.qr.app.utils.get(paramters, "id")
+						uni.navigateTo({//跳转到图文详情页
+							url: '/pages/tool/circleFriends/detail?id=' + id,
+							success: (e) => {
+								console.log(e)
+							},
+							fail: (e) => {
+								console.log(e)
+							}
+						})
+						break;
+					default:
+						console.log("未获取的数据跳转")
+						break;
+				}
+			}
+			
             setTimeout(async ()=>{
 			  
 			  let navArray = await laoyiApi.union.jd.jingfen.getNav()

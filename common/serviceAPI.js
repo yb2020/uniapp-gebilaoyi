@@ -3,7 +3,7 @@ import store from '@/store'
 import Authorization from "@/common/Authorization"
 
 // var baseUrl = 'https://api.wuhuhai.com'
-var baseUrl = 'http://192.168.1.101:9999'
+var baseUrl = 'http://192.168.1.103:9999'
 // #ifdef H5
 baseUrl = ''
 // #endif

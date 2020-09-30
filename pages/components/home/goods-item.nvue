@@ -31,7 +31,9 @@
 						<view class="couponPriceDiscount">
 							券后价￥<span>{{options.priceInfo.lowestCouponPrice}}</span>
 						</view>
-						<button class="button">马上抢</button>
+						<view>
+							<button class="button">马上抢</button>
+						</view>
 					 </view>
 				 </view>
 				 
@@ -144,6 +146,7 @@
 			flex-direction: row;
 			justify-content: space-between ;
 			align-items: center;
+			
 			.couponPriceDiscount {
 				font-size: 28upx ;
 				flex-direction: row;
